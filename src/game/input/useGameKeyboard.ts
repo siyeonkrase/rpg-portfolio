@@ -1,9 +1,15 @@
-// src/game/useGameKeyboard.ts
 import { useEffect, useRef } from "react";
 import { useAtom, useAtomValue } from "jotai";
-import { playerAtom, cameraXAtom, currentMapIdAtom } from "./state/gameAtoms";
-import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES } from "./config";
-import { maps, isBlockedAt } from "./maps";
+import { playerAtom, cameraXAtom, currentMapIdAtom } from "../state/gameAtoms";
+import {
+  TILE_SIZE,
+  VIEWPORT_WIDTH_TILES,
+  VIEWPORT_HEIGHT_TILES,
+} from "../data/config";
+import { maps } from "../data/maps";
+import type { PlayerState } from "../data/types";
+
+console.log("✅ useGameKeyboard file loaded (v-test-123)");
 
 const MOVE_SPEED = 500; // px/s
 const VIEWPORT_WIDTH_PX = VIEWPORT_WIDTH_TILES * TILE_SIZE;
@@ -15,6 +21,28 @@ type PressState = {
   up: boolean;
   down: boolean;
 };
+
+export type AABB = { x: number; y: number; w: number; h: number };
+type CollisionWorldLike = {
+  hitsAny?: (box: AABB) => boolean;
+  solids?: AABB[];      // 디버그용(있을 수도/없을 수도)
+  colliders?: AABB[];   // 디버그용(있을 수도/없을 수도)
+};
+
+// ✅ 발바닥 히트박스(중요!)
+const FOOT_W = TILE_SIZE * 0.45;
+const FOOT_H = TILE_SIZE * 0.25;
+export function footBox(x: number, y: number): AABB {
+  return {
+    x: x - FOOT_W / 2,
+    y: y - FOOT_H,
+    w: FOOT_W,
+    h: FOOT_H,
+  };
+}
+
+// 로그 폭발 방지 (ms)
+const DEBUG_LOG_EVERY_MS = 200;
 
 export function useGameKeyboard() {
   const [, setPlayer] = useAtom(playerAtom);
@@ -29,21 +57,28 @@ export function useGameKeyboard() {
   });
 
   const lastTimeRef = useRef<number | null>(null);
+  const lastLogRef = useRef<number>(0);
 
   useEffect(() => {
+    console.log("✅ useGameKeyboard effect mounted (v-test-123)");
     function handleKeyDown(e: KeyboardEvent) {
       const k = e.key;
 
-      if (
-        k === "ArrowLeft" || k === "ArrowRight" ||
-        k === "ArrowUp"   || k === "ArrowDown"  ||
-        k === "w" || k === "W" ||
-        k === "a" || k === "A" ||
-        k === "s" || k === "S" ||
-        k === "d" || k === "D"
-      ) {
-        e.preventDefault();
-      }
+      const isMoveKey =
+        k === "ArrowLeft" ||
+        k === "ArrowRight" ||
+        k === "ArrowUp" ||
+        k === "ArrowDown" ||
+        k === "w" ||
+        k === "W" ||
+        k === "a" ||
+        k === "A" ||
+        k === "s" ||
+        k === "S" ||
+        k === "d" ||
+        k === "D";
+
+      if (isMoveKey) e.preventDefault();
 
       if (k === "ArrowLeft" || k === "a" || k === "A") pressedRef.current.left = true;
       if (k === "ArrowRight" || k === "d" || k === "D") pressedRef.current.right = true;
@@ -65,9 +100,7 @@ export function useGameKeyboard() {
     let frameId: number;
 
     const loop = (time: number) => {
-      if (lastTimeRef.current == null) {
-        lastTimeRef.current = time;
-      }
+      if (lastTimeRef.current == null) lastTimeRef.current = time;
       const dt = (time - lastTimeRef.current) / 1000;
       lastTimeRef.current = time;
 
@@ -88,34 +121,64 @@ export function useGameKeyboard() {
       }
 
       if (dx !== 0 || dy !== 0) {
-        const map = maps[currentMapId];
+        const map = maps["town"];
         const mapWidthTiles = map.tiles[0].length;
-        // const mapHeightTiles = map.tiles.length;
         const mapWidthPx = mapWidthTiles * TILE_SIZE;
-        // const mapHeightPx = mapHeightTiles * TILE_SIZE;
 
-        setPlayer((prev) => {
+        // ✅ GameCanvas에서 노출한 collision world 사용
+        const cw = (globalThis as any).__collisionWorld as CollisionWorldLike | undefined;
+
+        setPlayer((prev: PlayerState) => {
           let nextX = prev.x + dx * MOVE_SPEED * dt;
           let nextY = prev.y + dy * MOVE_SPEED * dt;
 
-          // 🔹 충돌 체크는 지금 비활성화 상태 유지 (에디터 모드)
-          // const tileX = Math.floor(nextX / TILE_SIZE);
-          // const tileY = Math.floor(nextY / TILE_SIZE);
-          // if (isBlockedAt(currentMapId, tileX, tileY)) { ... }
-
-          // 🔹 맵 밖으로 너무 튀어나가는 것만 대충 막기
+          // 🔹 맵 밖 클램프(기존 유지)
           const margin = TILE_SIZE * 0.1;
           nextX = Math.min(Math.max(nextX, margin), mapWidthPx - margin);
 
           const maxY = VIEWPORT_HEIGHT_PX - margin;
           nextY = Math.min(Math.max(nextY, margin), maxY);
 
-          // 🔹 카메라: 플레이어를 가운데 두되,
-          //    맵 밖(왼/오른쪽)은 절대 안 보이게 클램프
+          // ✅ 충돌: X 이동 먼저 (슬라이딩)
+          if (cw?.hitsAny) {
+            const tryX = footBox(nextX, prev.y);
+            const hitX = cw.hitsAny(tryX);
+            if (hitX) nextX = prev.x;
+
+            const tryY = footBox(nextX, nextY);
+            const hitY = cw.hitsAny(tryY);
+            if (hitY) nextY = prev.y;
+
+            // (디버그) 200ms에 1번만
+            if (time - lastLogRef.current > DEBUG_LOG_EVERY_MS) {
+              lastLogRef.current = time;
+
+              const count =
+                (cw.solids?.length ?? cw.colliders?.length ?? -1);
+
+              console.log("[COLLISION]", {
+                map: currentMapId,
+                cwCount: count,
+                prev: { x: prev.x, y: prev.y },
+                next: { x: nextX, y: nextY },
+                tryX,
+                hitX,
+                tryY,
+                hitY,
+              });
+            }
+          } else {
+            // cw가 없거나 hitsAny가 없을 때도 1초에 1번 정도만 찍기
+            if (time - lastLogRef.current > 1000) {
+              lastLogRef.current = time;
+              console.log("[COLLISION] cw missing or hitsAny missing", cw);
+            }
+          }
+
+          // 🔹 카메라 (기존 유지)
           let targetCameraX = nextX - VIEWPORT_WIDTH_PX / 2;
 
           if (mapWidthPx <= VIEWPORT_WIDTH_PX) {
-            // 맵이 화면보다 짧으면 스크롤할 필요 없음
             targetCameraX = 0;
           } else {
             const maxCamX = mapWidthPx - VIEWPORT_WIDTH_PX;
@@ -123,14 +186,8 @@ export function useGameKeyboard() {
             if (targetCameraX > maxCamX) targetCameraX = maxCamX;
           }
 
-          // cameraX는 ref로 안 들고 그냥 여기서 바로 세팅
           setCameraX(targetCameraX);
-
-          return {
-            ...prev,
-            x: nextX,
-            y: nextY,
-          };
+          return { ...prev, x: nextX, y: nextY };
         });
       }
 

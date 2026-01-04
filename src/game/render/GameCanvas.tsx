@@ -3,18 +3,18 @@ import { useEffect, useRef } from "react";
 import * as PIXI from "pixi.js";
 import { useAtomValue } from "jotai";
 import { currentMapIdAtom, playerAtom, cameraXAtom } from "../state/gameAtoms";
-import { maps, scenery } from "../maps";
-import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES } from "../config";
-import { tiles } from "./tileset";
-import { townTiles } from "./townTileset";
-import { cityTiles } from "./cityTileset";
+import { maps, scenery } from "../data/maps";
+import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES } from "../data/config";
+import { tiles } from "./tilesets/tileset";
+import { townTiles } from "./tilesets/townTileset";
+import { cityTiles } from "./tilesets/cityTileset";
 import {
   drawLandmarksAndHouses,
   attachBillboardTicker,
   type BillboardInfo,
-} from "./landmarks";
-import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "./depthSort";
-import { drawStickyNotesOnBoard } from "./stickyNotes";
+} from "../pixi/landmarks";
+import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../pixi/depthSort";
+import { drawStickyNotesOnBoard } from "../pixi/stickyNotes";
 
 const WORLD_OFFSET_Y = 0;
 
@@ -218,7 +218,7 @@ export function GameCanvas() {
   const currentMapId = useAtomValue(currentMapIdAtom);
   const player = useAtomValue(playerAtom);
   const cameraX = useAtomValue(cameraXAtom);
-  const map = maps[currentMapId];
+  const map = maps["town"];
 
   // ─ 1) Pixi 앱 & 기본 노드 한 번만 생성 ─
   useEffect(() => {
@@ -336,8 +336,6 @@ export function GameCanvas() {
     const sceneryOcclusion = new PIXI.Container();
 
     scenery.forEach((obj) => {
-      if (obj.mapId !== currentMapId) return;
-
       const px = obj.x; // 이미 TILE_SIZE 곱해둔 상태
       const py = obj.y;
 

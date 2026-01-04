@@ -1,11 +1,10 @@
 import * as PIXI from "pixi.js";
-import { TILE_SIZE } from "../config";
-import { tiles } from "./tileset";
-import { townTiles } from "./townTileset";
-import { cityTiles } from "./cityTileset";
-import { landmarks, houses, LandmarkKind } from "../maps";
+import { TILE_SIZE } from "../data/config";
+import { tiles } from "../render/tilesets/tileset";
+import { townTiles } from "../render/tilesets/townTileset";
+import { cityTiles } from "../render/tilesets/cityTileset";
+import { landmarks, houses, LandmarkKind } from "../data/maps";
 import { setDepth } from "./depthSort";
-import { createFountainSprite } from "./fountainAnim";
 
 type LandmarkDef = {
   width: number;
@@ -165,11 +164,6 @@ const LANDMARK_DEFS: Record<LandmarkKind, LandmarkDef> = {
         cityTiles.buildingWindowGreenR,
       ],
     ],
-  },
-  fountain: {
-    width: 0,
-    height: 0,
-    rows: []
   }
 };
 
@@ -402,17 +396,8 @@ export function drawLandmarksAndHouses(
 ) {
   // landmarks
   landmarks.forEach((lm) => {
-    if (lm.mapId !== currentMapId) return;
-
-    
     const worldX = lm.x;
     const groundY = lm.y;
-
-    if (lm.kind === "fountain") {
-      const fountain = createFountainSprite(worldX, groundY);
-      container.addChild(fountain as any);
-      return;
-    }
   
     const def = LANDMARK_DEFS[lm.kind];
     if (!def) return;
@@ -426,7 +411,6 @@ export function drawLandmarksAndHouses(
 
   // houses
   houses.forEach((h) => {
-    if (h.mapId !== currentMapId) return;
     const worldX = h.x * TILE_SIZE;
     const groundY = h.y * TILE_SIZE;
     drawHouses(container, h.kind, worldX, groundY);

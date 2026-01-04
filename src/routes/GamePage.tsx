@@ -1,9 +1,9 @@
 // src/routes/GamePage.tsx
-import { GameCanvas } from "../game/pixi/GameCanvas";
+import { GameCanvas } from "../game/render/GameCanvas";
 import { DialogueBox } from "../components/ui/DialogueBox";
 import { ProjectModal } from "../components/ui/ProjectModal";
 import { HUD } from "../components/ui/HUD";
-import { useGameKeyboard } from "../game/useGameKeyboard";
+import { useGameKeyboard } from "../game/input/useGameKeyboard";
 
 export default function GamePage() {
   useGameKeyboard();

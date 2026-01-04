@@ -2,11 +2,11 @@
 import React from "react";
 import { useAtomValue } from "jotai";
 import { currentMapIdAtom } from "../../game/state/gameAtoms";
-import { maps } from "../../game/maps";
+import { maps } from "../../game/data/maps";
 
 export function HUD() {
   const currentMapId = useAtomValue(currentMapIdAtom);
-  const map = maps[currentMapId];
+  const map = maps;
 
   return (
     <div
@@ -21,7 +21,7 @@ export function HUD() {
         fontSize: 12,
       }}
     >
-      <div>Map: {map.name}</div>
+      <div>Map: Siyeon Town</div>
       <div>Move: Arrow / WASD · Interact: Enter / Space</div>
     </div>
   );

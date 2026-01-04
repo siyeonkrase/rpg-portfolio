@@ -1,7 +1,7 @@
 // src/game/pixi/tileset.ts
 import * as PIXI from "pixi.js";
-import tilesetImage from "../../assets/tilemap_packed.png";
-import farmTilesetImage from "../../assets/farm_tilemap_packed.png";
+import tilesetImage from "../../../assets/tilemap_packed.png";
+import farmTilesetImage from "../../../assets/farm_tilemap_packed.png";
 
 // 타일 한 칸 크기 (이 시트는 16x16)
 export const TILESET_TILE_SIZE = 16;
