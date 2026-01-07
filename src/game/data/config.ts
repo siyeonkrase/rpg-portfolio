@@ -10,7 +10,6 @@ export const VIEWPORT_HEIGHT_TILES = 12; // 12 * 32 = 384px
 // 물리 상수
 export const GRAVITY = 2500;       // px/s^2
 export const MOVE_SPEED = 220;     // px/s
-export const JUMP_FORCE = -900;    // px/s (위로 점프 = 음수)
 
 // 상호작용 거리
 export const INTERACT_DISTANCE = TILE_SIZE * 1.2;

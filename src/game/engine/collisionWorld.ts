@@ -1,7 +1,7 @@
 // src/game/engine/collisionWorld.ts
 import type { AABB, SceneryLike } from "./collisionRules";
 import { collidersForScenery } from "./collisionRules";
-import { landmarks, houses, scenery } from "../data/maps"; // 경로 맞춰
+import { scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE } from "../data/config";
 import type { MapId } from "../data/types";
 

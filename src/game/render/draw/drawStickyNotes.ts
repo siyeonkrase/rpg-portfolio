@@ -24,6 +24,7 @@ export function drawStickyNotesOnBoard(
   boardHeight: number,
   count: number = 6
 ) {
+  console.log(count)
   // 보드 안쪽 여백 (외곽 라인 안쪽부터 시작)
   const padding = 4;
   const POSTIT_SIZE = 10;

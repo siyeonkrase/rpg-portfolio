@@ -22,7 +22,6 @@ export function enableDepthSorting(
   world: PIXI.Container,
   stage?: PIXI.Container
 ) {
-  console.log(123);
   world.sortableChildren = true;
   if (stage) {
     stage.sortableChildren = true;

@@ -12,18 +12,18 @@ const BUILDING_TOP_Y = 5; // 🔥 건물 지붕이 시작하는 줄도 같이 �
 
 function createEmptyCity(): number[][] {
   const tiles: number[][] = [
-    [1, 1, 1, 1, 2, 1, 2, 3, 1, 1, 1, 1, 1, 10, 8, 8, 12, 3, 1, 2, 2, 1, 2, 3, 1, 1, 1, 1, 1, 1, 2, 10, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 10, 12, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 10, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 13, 1, 2, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 2, 1, 3, 1, 2, 13, 13, 13, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 13, 1, 2, 1, 13, 13, 1, 1, 1, 13, 13, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 2, 2, 1, 1, 1, 1, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 13, 2, 1, 13, 2, 1, 1, 1, 1, 2, 3, 13, 1, 13, 1, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 3, 1, 13, 2, 1, 2, 3, 13, 13, 2, 3, 1, 1, 1, 1, 1, 2, 2, 13, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 2, 2, 13, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 2, 1, 3, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 2, 2, 13, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [5, 5, 6, 1, 2, 2, 1, 13, 13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 3, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [8, 8, 8, 5, 6, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 13, 13, 2, 13, 13, 13, 13, 1, 13, 2, 13, 13, 1, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [8, 8, 8, 8, 8, 6, 3, 2, 2, 2, 1, 2, 1, 1, 2, 3, 1, 1, 3, 2, 2, 1, 2, 3, 13, 1, 1, 1, 3, 1, 2, 13, 1, 13, 13, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 2, 1, 2, 3, 1, 1, 1, 1, 1, 10, 8, 8, 12, 3, 1, 2, 2, 1, 2, 3, 1, 1, 1, 1, 1, 1, 2, 10, 8, 8, 1, 1, 1, 1, 2, 3, 2, 1, 3, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 10, 12, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 10, 12, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 13, 1, 2, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 2, 1, 3, 1, 2, 13, 13, 13, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 13, 1, 2, 1, 13, 13, 1, 1, 1, 13, 13, 1, 3, 2, 13, 13, 1, 13, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [2, 1, 1, 2, 2, 1, 1, 1, 1, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 13, 2, 1, 13, 2, 1, 1, 1, 1, 2, 3, 13, 1, 13, 13, 2, 13, 13, 13, 13, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 3, 1, 13, 2, 1, 2, 3, 13, 13, 2, 3, 1, 1, 1, 1, 1, 2, 2, 13, 2, 1, 1, 2, 1, 2, 1, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [2, 2, 2, 13, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 2, 1, 3, 2, 2, 1, 2, 1, 3, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [2, 2, 2, 13, 2, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 2, 4, 5, 5, 5, 5, 5, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [5, 5, 6, 1, 2, 13, 2, 13, 13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 3, 13, 1, 1, 1, 1, 1, 1, 2, 7, 8, 8, 8, 8, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [8, 8, 8, 5, 6, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 13, 13, 2, 13, 13, 13, 13, 1, 13, 2, 13, 13, 1, 13, 13, 13, 2, 1, 2, 1, 1, 1, 3, 1, 10, 11, 11, 11, 11, 11, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [8, 8, 8, 8, 8, 6, 3, 2, 2, 2, 1, 2, 1, 1, 2, 3, 1, 1, 3, 2, 2, 1, 2, 3, 13, 1, 1, 1, 3, 1, 2, 13, 1, 13, 13, 2, 3, 1, 2, 3, 2, 1, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ];
 
   return tiles;
@@ -120,14 +120,14 @@ export const landmarks: LandmarkData[] = [
   },
   {
     id: "lm-computer",
-    x: 27 * TILE_SIZE,
+    x: 26.5 * TILE_SIZE,
     y: 10 * TILE_SIZE,
     kind: "computer",
   },
   {
     id: "lm-bank",
-    x: 36 * TILE_SIZE,
-    y: 5 * TILE_SIZE,
+    x: 35 * TILE_SIZE,
+    y: 4 * TILE_SIZE,
     kind: "bank",
   },
 ];
@@ -238,7 +238,7 @@ export type HouseKind =
   { id: "house-2", x: 19.5, y: 4, kind: "blueS" },
   { id: "house-3", x: 19, y: 10, kind: "orangeM" },
   { id: "house-4", x: 27.5, y: 3, kind: "orangeS" },
-  { id: "house-5", x: 35, y: 11, kind: "blueM" },
+  { id: "house-5", x: 35, y: 10.5, kind: "blueM" },
 ];
 
 // ─────────────────────────────
@@ -359,7 +359,12 @@ export type SceneryKind =
   | "displayBoard4"
   | "displayBoard5"
   | "displayBoard6"
-  | "fountain1";
+  | "fountain1"
+  | "tomato"
+  | "radish"
+  | "carrot"
+  | "corn"
+  | "carrot2";
 
 export type SceneryData = {
   id: string;
@@ -410,6 +415,16 @@ export const scenery: SceneryData[] = [
   { id: "plant-1", x: 23 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "plant" },
   { id: "tree-small-1", x: 23 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "treeGreenSmall" },
 
+  // { id: "tree-left-1", x: 38 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup7" },
+  // { id: "tree-left-4", x: 39 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup9" },
+  // { id: "tree-left-3", x: 40 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup7" },
+  // { id: "tree-left-4", x: 41 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup9" },
+  // { id: "tree-left-1", x: 42 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup7" },
+  // { id: "tree-left-4", x: 43 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup9" },
+  // { id: "tree-left-3", x: 44 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup7" },
+  // { id: "tree-left-4", x: 45 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup9" },
+  
+
   // =========================================================
   // D) CITY: 좌하단/우하단 정원/울타리/나무/우물/꽃 등
   // =========================================================
@@ -424,20 +439,51 @@ export const scenery: SceneryData[] = [
   { id: "fence-5", x: 1 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare4" },
   { id: "fence-6", x: 1 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceSquare6" },
   { id: "fence-7", x: 2 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceH3" },
-  { id: "fence-8", x: 4 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceH1" },
+  // { id: "fence-8", x: 4 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceH1" },
+
+  // { id: "fence-1", x: 39 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare1" },
+  // { id: "fence-2", x: 40 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-3", x: 41 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-4", x: 42 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-2", x: 43 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-3", x: 44 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-4", x: 45 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare2" },
+  // { id: "fence-4", x: 46 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceSquare3" },
+  // { id: "fence-5", x: 39 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceSquare4" },
+  // { id: "fence-5", x: 39 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "fenceSquare4" },
+  // { id: "fence-4", x: 46 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceSquare5" },
+  // { id: "fence-6", x: 39 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "fenceSquare6" },
+  // { id: "fence-7", x: 40 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "fenceSquare7" },
+  // { id: "fence-7", x: 45 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "fenceSquare7" },
+
+  { id: "fence-1", x: 39 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare1" },
+  { id: "fence-2", x: 40 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-3", x: 41 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-4", x: 42 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-2", x: 43 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-3", x: 44 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-4", x: 45 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare2" },
+  { id: "fence-4", x: 46 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "fenceSquare3" },
+  { id: "fence-5", x: 39 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "fenceSquare4" },
+  { id: "fence-5", x: 39 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "fenceSquare4" },
+  { id: "fence-4", x: 46 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "fenceSquare5" },
+  { id: "fence-6", x: 39 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "fenceSquare6" },
+  { id: "fence-7", x: 40 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "fenceSquare7" },
+  { id: "fence-7", x: 45 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "fenceSquare7" },
+  // { id: "fence-8", x: 4 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "fenceH1" },
 
   // 키 큰 나무(2칸짜리: 위/아래)
   { id: "tree-tall-1-top", x: 10 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "treeGreenTall2" },
   { id: "tree-tall-1-bot", x: 10 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall1" },
-  { id: "tree-tall-2-top", x: 12 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "treeGreenTall2" },
-  { id: "tree-tall-2-bot", x: 12 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall1" },
+  // { id: "tree-tall-2-top", x: 12 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "treeGreenTall2" },
+  // { id: "tree-tall-2-bot", x: 12 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall1" },
 
   // 우물(2칸짜리)
   { id: "well-1-top", x: 14 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "well1" },
   { id: "well-1-bot", x: 14 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "well2" },
 
-  { id: "well-2-top", x: 31.9 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "well1" },
-  { id: "well-2-bot", x: 31.9 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "well2" },
+  { id: "well-2-top", x: 31.9 * TILE_SIZE, y: 8.5 * TILE_SIZE, kind: "well1" },
+  { id: "well-2-bot", x: 31.9 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "well2" },
 
   // 노란 나무 라인
   { id: "tree-yellow-1-top", x: 1 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeYellowTall2" },
@@ -477,19 +523,39 @@ export const scenery: SceneryData[] = [
   { id: "tree-tall-6-bot", x: 29 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenTall1" },
 
   { id: "tree-tall-7-top", x: 30 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenTall2" },
-  // { id: "tree-tall-7-bot", mapId: "city", x: 30 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "treeGreenTall1" },
+  { id: "tree-tall-7-bot", x: 30 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "treeGreenTall1" },
 
   { id: "tree-yellow-8", x: 31 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeYellowSmall" },
 
   { id: "tree-tall-8-top", x: 28.7 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "treeGreenTall2" },
   { id: "tree-tall-8-bot", x: 28.7 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall1" },
 
+  { id: "tree-tall-7-top", x: 37 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall2" },
+  { id: "tree-tall-7-bot", x: 37 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "treeGreenTall1" },
+  { id: "tree-tall-7-top", x: 38 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "treeGreenTall2" },
+  { id: "tree-tall-7-bot", x: 38 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "treeGreenTall1" },
+
+
   // 작은 오브젝트들
   { id: "mush-1", x: 16.5 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "mushroom" },
+  { id: "carrot-1", x: 39.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "tomato" },
+  { id: "carrot-1", x: 40.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "corn" },
+  { id: "carrot-1", x: 41.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "carrot" },
+  { id: "carrot-1", x: 42.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "carrot2" },
+  { id: "carrot-1", x: 43.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "carrot2" },
+  { id: "carrot-1", x: 44.5 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "carrot" },
+  { id: "corn-1", x: 39.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "corn" },
+  { id: "corn-1", x: 40.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "carrot" },
+  { id: "corn-1", x: 41.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "carrot2" },
+  { id: "corn-1", x: 42.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "tomato" },
+  { id: "corn-1", x: 43.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "corn" },
+  { id: "corn-1", x: 44.5 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "carrot2" },
 
   // 해바라기(2칸)
-  { id: "sunflower-1-top", x: 31.9 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "sunflowerT" },
-  { id: "sunflower-1-bot", x: 31.9 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "sunflowerB" },
+  { id: "sunflower-1-top", x: 39.5 * TILE_SIZE, y: 3.5 * TILE_SIZE, kind: "sunflowerT" },
+  { id: "sunflower-1-bot", x: 39.5 * TILE_SIZE, y: 4.5 * TILE_SIZE, kind: "sunflowerB" },
+  { id: "sunflower-1-top", x: 46 * TILE_SIZE, y: 8.5 * TILE_SIZE, kind: "sunflowerT" },
+  { id: "sunflower-1-bot", x: 46 * TILE_SIZE, y: 9.5 * TILE_SIZE, kind: "sunflowerB" },
 
   // =========================================================
   // E) CITY: 가로등/세탁대/쓰레기통/벤치 등 생활 소품
@@ -505,11 +571,11 @@ export const scenery: SceneryData[] = [
   { id: "light-2-b", x: 23 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "twoLightPoleB" },
 
   // 세탁대(연속 5조각)
-  { id: "drying-1-1", x: 7 * TILE_SIZE, y: 10.5 * TILE_SIZE, kind: "dryingPole1" },
-  { id: "drying-1-2", x: 8 * TILE_SIZE, y: 10.5 * TILE_SIZE, kind: "dryingPole2" },
-  { id: "drying-1-3", x: 9 * TILE_SIZE, y: 10.5 * TILE_SIZE, kind: "dryingPole3" },
-  { id: "drying-1-4", x: 10 * TILE_SIZE, y: 10.5 * TILE_SIZE, kind: "dryingPole4" },
-  { id: "drying-1-5", x: 10.1 * TILE_SIZE, y: 10.5 * TILE_SIZE, kind: "dryingPole1" },
+  { id: "drying-1-1", x: 7 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
+  { id: "drying-1-2", x: 8 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole2" },
+  { id: "drying-1-3", x: 9 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole3" },
+  { id: "drying-1-4", x: 10 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole4" },
+  { id: "drying-1-5", x: 10.1 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
 
   // 쓰레기통
   { id: "trashcan-1", x: 16 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "trashCan2" },
@@ -522,14 +588,14 @@ export const scenery: SceneryData[] = [
   // F) CITY: 보드(게시판) + 포스트잇 올라가는 영역
   // =========================================================
   // 보드(윗줄 3 + 아랫줄 3 + 다리 2)
-  { id: "board-1-1", x: 29.7 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "board1" },
-  { id: "board-1-2", x: 30.7 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "board2" },
-  { id: "board-1-3", x: 31.7 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "board3" },
-  { id: "board-1-4", x: 29.7 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "board7" },
-  { id: "board-1-5", x: 30.7 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "board8" },
-  { id: "board-1-6", x: 31.7 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "board9" },
-  { id: "board-1-legL", x: 30.2 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "boardL" },
-  { id: "board-1-legR", x: 31.2 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "boardR" },
+  { id: "board-1-1", x: 46 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "board1" },
+  { id: "board-1-2", x: 47 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "board2" },
+  { id: "board-1-3", x: 48 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "board3" },
+  { id: "board-1-4", x: 46 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "board7" },
+  { id: "board-1-5", x: 47 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "board8" },
+  { id: "board-1-6", x: 48 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "board9" },
+  { id: "board-1-legL", x: 46.5 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "boardL" },
+  { id: "board-1-legR", x: 47.5 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "boardR" },
 
   // =========================================================
   // G) CITY: 기타 울타리 (짧은 구간)
@@ -572,13 +638,12 @@ export const scenery: SceneryData[] = [
   // =========================================================
   // J) CITY: 은행 디테일(문/간판/ATM)
   // =========================================================
-  { id: "bank-door-l", x: 36 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "doorL" },
-  { id: "bank-door-r", x: 37 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "doorR" },
-  { id: "bank-sign-l", x: 36 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "signBlueL" },
-  { id: "bank-sign-r", x: 37 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "signBlueR" },
-  { id: "bank-atm-1", x: 34 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "atm" },
-  { id: "bank-atm-2", x: 35 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "atm" },
+  { id: "bank-door-l", x: 35 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "doorL" },
+  { id: "bank-door-r", x: 36 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "doorR" },
+  { id: "bank-sign-l", x: 35 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "signBlueL" },
+  { id: "bank-sign-r", x: 36 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "signBlueR" },
+  { id: "bank-atm-1", x: 33 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "atm" },
+  { id: "bank-atm-2", x: 34 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "atm" },
 
-  // (미사용 후보)
-  // { id: "fountain-1", mapId: "city", x: 45 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "fountain1" },
+  
 ];

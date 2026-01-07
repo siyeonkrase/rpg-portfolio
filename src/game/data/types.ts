@@ -1,9 +1,12 @@
 // src/game/data/types.ts
 export type MapId = "town"; // 실제 쓰는 맵 id들로 계속 추가
+export type Dir = "down" | "left" | "right" | "up";
 
 export interface PlayerState {
   x: number; // px
   y: number; // px
+  dir: Dir;
+  moving: boolean;
 }
 
 export interface MapData {

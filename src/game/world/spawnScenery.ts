@@ -45,7 +45,7 @@ function spawnTreeTall(
   leaves.anchor.set(0.5, 1);
   leaves.x = inst.x;
   leaves.y = inst.y;
-  layers.occlusion.addChild(leaves as any);
+  layers.actors.addChild(leaves as any);
 
   // collider: trunk 발판 영역만
   // 튜닝 포인트: w/h, y 오프셋
@@ -65,7 +65,7 @@ function spawnHouseA(inst: SceneryInstance, layers: WorldLayers, collision: Coll
   roof.anchor.set(0.5, 1);
   roof.x = inst.x;
   roof.y = inst.y;
-  layers.occlusion.addChild(roof as any);
+  layers.actors.addChild(roof as any);
 
   // collider: 건물 벽 영역
   collision.add({ x: inst.x - 32, y: inst.y - 32, w: 64, h: 32 });

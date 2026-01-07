@@ -169,4 +169,11 @@ export const tiles = {
   wellB: slice(8, 8),
   sunflowerT: sliceFarm(4, 1),
   sunflowerB: sliceFarm(4, 2),
+
+  // 밭
+  tomato: sliceFarm(9, 4),
+  radish: sliceFarm(10, 2),
+  corn: sliceFarm(11, 4),
+  carrot: sliceFarm(8, 4),
+  carrot2: sliceFarm(8, 5),
 };

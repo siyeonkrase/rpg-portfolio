@@ -1,13 +1,15 @@
 import { atom } from "jotai";
-import type { MapId, PlayerState } from "../types";
+import type { MapId, PlayerState } from "../data/types";
 
-export const currentMapIdAtom = atom<MapId>("city");
+export const currentMapIdAtom = atom<MapId>("town");
 
 export const playerAtom = atom<PlayerState>({
-  // x: 112,
-  // y: 240
-  x: 1000,
-  y: 240
+  x: 112,
+  y: 240,
+  // x: 1000,
+  // y: 240,
+  dir: "down",
+  moving: false,
 });
 
 // 카메라 X (px)

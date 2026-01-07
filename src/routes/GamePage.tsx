@@ -26,7 +26,7 @@ export default function GamePage() {
         }}
       >
         <GameCanvas />
-        <HUD />
+        {/* <HUD /> */}
         <DialogueBox />
         <ProjectModal />
       </div>
