@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/rpg-portfolio/static/css/main.b9c1c014.css",
-    "main.js": "/rpg-portfolio/static/js/main.7f6fc1ce.js",
+    "main.js": "/rpg-portfolio/static/js/main.81e95167.js",
     "static/media/computerSign.png": "/rpg-portfolio/static/media/computerSign.137b91c5cc5bec26f3b9.png",
     "static/media/cinemaSign.png": "/rpg-portfolio/static/media/cinemaSign.603ee2cd1110a3e7964b.png",
     "static/media/chrome.png": "/rpg-portfolio/static/media/chrome.40e44aa5c3efa6186e47.png",
@@ -35,10 +35,10 @@
     "static/media/walkongrass2.mp3": "/rpg-portfolio/static/media/walkongrass2.5c2b1c44989ee1257812.mp3",
     "index.html": "/rpg-portfolio/index.html",
     "main.b9c1c014.css.map": "/rpg-portfolio/static/css/main.b9c1c014.css.map",
-    "main.7f6fc1ce.js.map": "/rpg-portfolio/static/js/main.7f6fc1ce.js.map"
+    "main.81e95167.js.map": "/rpg-portfolio/static/js/main.81e95167.js.map"
   },
   "entrypoints": [
     "static/css/main.b9c1c014.css",
-    "static/js/main.7f6fc1ce.js"
+    "static/js/main.81e95167.js"
   ]
 }
