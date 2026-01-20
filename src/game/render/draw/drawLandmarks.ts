@@ -1,4 +1,3 @@
-// src/game/render/draw/drawLandmarks.ts
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "../../data/config";
 import { landmarks, houses, type LandmarkKind } from "../../data/maps";
@@ -10,9 +9,6 @@ import cinemaSignPng from "../../../assets/cinemaSign.png"
 import computerSignPng from "../../../assets/computerSign.png"
 import churchPng from "../../../assets/churchPng.png"
 
-/** ─────────────────────────────
- *  Billboard types
- *  ───────────────────────────── */
 export type PriceCell = { text: PIXI.Text; row: number; col: number };
 
 export type BillboardInfo =
@@ -39,18 +35,16 @@ export type BillboardInfo =
 export type BillboardRefLike = { current: BillboardInfo[] };
 
 type SpriteBillboardOpts = {
-  landmarkKind: LandmarkKind;        // 어떤 랜드마크 크기 기준으로 배치할지
-  texture: PIXI.Texture;             // 사용할 텍스처 (PNG)
+  landmarkKind: LandmarkKind;
+  texture: PIXI.Texture;     
 
-  // 크기/위치 튜닝
-  widthRatio?: number;               // default 0.7 (랜드마크 폭 대비)
-  offsetX?: number;                  // px
-  offsetY?: number;                  // px
+  widthRatio?: number;
+  offsetX?: number;   
+  offsetY?: number;   
 
-  // hover 애니메이션
-  hoverAmpTiles?: number;            // default 0 (TILE_SIZE 단위)
-  hoverSpeed?: number;               // default 0.06
-  hoverPhase?: number;               // default random
+  hoverAmpTiles?: number;
+  hoverSpeed?: number;   
+  hoverPhase?: number;   
 };
 
 function addLandmarkSpriteBillboard(
@@ -70,8 +64,6 @@ function addLandmarkSpriteBillboard(
 
   const widthRatio = opts.widthRatio ?? 0.7;
   const targetW = def.width * TILE_SIZE * widthRatio;
-
-  // 🔥 texture.width가 0이면 scale이 Infinity/NaN/0 꼴남 → 안 보임
   const texW = opts.texture.width;
   const texH = opts.texture.height;
 
@@ -99,26 +91,9 @@ function addLandmarkSpriteBillboard(
     phase: opts.hoverPhase ?? Math.random() * Math.PI * 2,
   });
 
-  // ✅ 디버그: 핵심 정보 찍기
-  console.log("[cinema sign created]", {
-    centerWorldX,
-    groundWorldY,
-    left,
-    top,
-    spriteXY: { x: s.x, y: s.y },
-    spriteWH: { w: s.width, h: s.height },
-    textureWH: { w: texW, h: texH },
-    scale,
-    parentName: s.parent?.name,
-    parentType: s.parent?.constructor?.name,
-  });
-
   return s;
 }
 
-/** ─────────────────────────────
- *  Landmark defs
- *  ───────────────────────────── */
 type LandmarkDef = {
   width: number;
   height: number;
@@ -160,6 +135,14 @@ export const LANDMARK_DEFS: Record<LandmarkKind, LandmarkDef> = {
       [cityTiles.buildingWindowL, cityTiles.buildingWindowGreenM, cityTiles.buildingWindowGreenM, cityTiles.buildingWindowGreenM, cityTiles.buildingWindowGreenR],
     ],
   },
+  board: {
+    width: 3,
+    height: 2,
+    rows: [
+      [cityTiles.board1, cityTiles.board2, cityTiles.board3],
+      [cityTiles.board7, cityTiles.board8, cityTiles.board9],
+    ],
+  },
 };
 
 function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWorldX: number, groundWorldY: number) {
@@ -182,12 +165,6 @@ function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWor
       container.addChild(s as any);
     }
   }
-
-  console.log("cinema sign", {
-    worldX: centerWorldX,
-    groundY: groundWorldY,
-    buildingTopY: groundWorldY - def.height * TILE_SIZE,
-  });
 }
 
 export function addChurchSprite(container: PIXI.Container, worldX: number, groundY: number) {
@@ -203,7 +180,7 @@ export function addChurchSprite(container: PIXI.Container, worldX: number, groun
   s.x = worldX;
   s.y = groundY;
 
-  // 크기: 타일 기준으로 맞추기 (추천: 6타일 폭)
+  // 크기: 타일 기준으로 맞추기
   const TARGET_W_TILES = 5;
   const targetW = TARGET_W_TILES * TILE_SIZE;
   const scale = targetW / tex.width;
@@ -332,9 +309,6 @@ function toWorldPx(v: number) {
   return v >= TILE_SIZE ? v : v * TILE_SIZE;
 }
 
-/** ─────────────────────────────
- *  Public API
- *  ───────────────────────────── */
 export function drawLandmarksAndHouses(
   layers: {
     building: PIXI.Container;
@@ -344,7 +318,6 @@ export function drawLandmarksAndHouses(
   currentMapId: string | number,
   billboards: BillboardInfo[]
 ) {
-  // landmarks
   landmarks.forEach((lm) => {
     const def = LANDMARK_DEFS[lm.kind];
     if (!def) return;
@@ -355,9 +328,8 @@ export function drawLandmarksAndHouses(
     drawLandmarkRect(layers.building, def, worldX, groundY);
 
     if (lm.kind === "bank") {
-      // 너가 하드코딩했던 위치를 px로 그대로 유지
       const screenLeft = 33.2 * TILE_SIZE;
-      const screenTop = -1 * TILE_SIZE + TILE_SIZE; // 기존 식을 px로 보정
+      const screenTop = -1 * TILE_SIZE + TILE_SIZE;
       createBankBillboard(layers.overlay, screenLeft, screenTop, billboards);
     }
 
@@ -378,7 +350,6 @@ export function drawLandmarksAndHouses(
         landmarkKind: "computer",
         texture: PIXI.Texture.from(computerSignPng),
         widthRatio: 1.3,
-        // offsetX: -10,
         offsetY: -30,
         hoverAmpTiles: 0,
         hoverSpeed: 0.15,
@@ -386,10 +357,9 @@ export function drawLandmarksAndHouses(
     }
   });
 
-  // houses
   houses.forEach((h) => {
-    const worldX = h.x * TILE_SIZE;      // ✅ 타일 → px
-    const groundY = h.y * TILE_SIZE;     // ✅ 타일 → px
+    const worldX = h.x * TILE_SIZE;
+    const groundY = h.y * TILE_SIZE;
     drawHouses(layers.building, h.kind, worldX, groundY);
   });
 }
@@ -417,11 +387,9 @@ export function attachBillboardTicker(app: PIXI.Application, billboardsRef: { cu
         continue;
       }
 
-      // bank
       const { g, width: w, height: h, cells } = b;
       g.clear();
 
-      // 배경
       g.lineStyle(2, 0x222222);
       g.beginFill(0x050708);
       g.drawRect(0, 0, w, h);
@@ -433,7 +401,6 @@ export function attachBillboardTicker(app: PIXI.Application, billboardsRef: { cu
       const topH = innerH * 0.4;
       const bottomH = innerH - topH - 2;
 
-      // 위 패널
       const panelCount = 3;
       const panelW = innerW / panelCount;
       for (let i = 0; i < panelCount; i++) {
@@ -453,12 +420,10 @@ export function attachBillboardTicker(app: PIXI.Application, billboardsRef: { cu
         g.endFill();
       }
 
-      // 아래 그리드 배경
       g.beginFill(0x050505);
       g.drawRect(margin, margin + topH + 2, innerW, bottomH);
       g.endFill();
-
-      // 숫자 갱신
+      
       if (accum > 6) {
         accum = 0;
         cells.forEach(({ text, col }) => {

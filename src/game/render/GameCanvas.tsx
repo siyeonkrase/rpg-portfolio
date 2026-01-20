@@ -1,10 +1,9 @@
-// src/game/pixi/GameCanvas.tsx
 import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
-import { useAtomValue } from "jotai";
-import { currentMapIdAtom, playerAtom, cameraXAtom } from "../state/gameAtoms";
+import { useAtom, useAtomValue } from "jotai";
+import { currentMapIdAtom, playerAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom } from "../state/gameAtoms";
 import { maps, scenery, landmarks, houses } from "../data/maps";
-import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES } from "../data/config";
+import { TILE_SIZE, LOGICAL_W, LOGICAL_H } from "../data/config";
 
 import { tiles } from "../render/tilesets/tileset";
 import { townTiles } from "../render/tilesets/townTileset";
@@ -24,10 +23,10 @@ import cinemaSignPng from "../../assets/cinemaSign.png";
 import { PlayerSprite } from "../pixi/player/PlayerSprite";
 import villagerManPng from "../../assets/MiniVillagerMan.png";
 import { makeVillagerAnim } from "../pixi/player/playerAnims";
+import { playItemAcquiredEffect } from "./draw/ItemEffect";
+import { PROJECT_INVENTORY_ICONS } from "../data/projectInventory";
 
 const WORLD_OFFSET_Y = 0;
-const LOGICAL_W = VIEWPORT_WIDTH_TILES * TILE_SIZE;
-const LOGICAL_H = VIEWPORT_HEIGHT_TILES * TILE_SIZE;
 
 const BUILDING_DETAIL_KINDS = new Set<string>([
   "redWindowCenter1",
@@ -131,7 +130,6 @@ const palette = {
   skyBottom: 0x5f8dd3,
 };
 
-// 타일 코드 -> 텍스처
 const TILE_CODE = {
   EMPTY: 0,
   GRASS: 1,
@@ -147,20 +145,6 @@ const TILE_CODE = {
   DIRT8: 11,
   DIRT9: 12,
   PATH: 13,
-  SIDEWALK1: 14,
-  SIDEWALK2: 15,
-  SIDEWALK3: 16,
-  SIDEWALK4: 17,
-  SIDEWALK5: 18,
-  SIDEWALK6: 19,
-  SIDEWALK7: 20,
-  SIDEWALK8: 21,
-  SIDEWALK9: 22,
-  PARKINGLINE: 23,
-  PARKINGSYM: 24,
-  SIDEWALK10: 25,
-  SIDEWALK11: 26,
-  SIDEWALK12: 27,
 } as const;
 
 function groundTexFromCode(code: number): PIXI.Texture | null {
@@ -193,34 +177,6 @@ function groundTexFromCode(code: number): PIXI.Texture | null {
       return tiles.dirt9;
     case TILE_CODE.PATH:
       return tiles.path;
-    case TILE_CODE.SIDEWALK1:
-      return townTiles.sidewalk1;
-    case TILE_CODE.SIDEWALK2:
-      return townTiles.sidewalk2;
-    case TILE_CODE.SIDEWALK3:
-      return townTiles.sidewalk3;
-    case TILE_CODE.SIDEWALK4:
-      return townTiles.sidewalk4;
-    case TILE_CODE.SIDEWALK5:
-      return townTiles.sidewalk5;
-    case TILE_CODE.SIDEWALK6:
-      return townTiles.sidewalk6;
-    case TILE_CODE.SIDEWALK7:
-      return townTiles.sidewalk7;
-    case TILE_CODE.SIDEWALK8:
-      return townTiles.sidewalk8;
-    case TILE_CODE.SIDEWALK9:
-      return townTiles.sidewalk9;
-    case TILE_CODE.SIDEWALK10:
-      return townTiles.sidewalk10;
-    case TILE_CODE.SIDEWALK11:
-      return townTiles.sidewalk11;
-    case TILE_CODE.SIDEWALK12:
-      return townTiles.sidewalk12;
-    case TILE_CODE.PARKINGLINE:
-      return townTiles.parkingLine1;
-    case TILE_CODE.PARKINGSYM:
-      return townTiles.parkingSymbol;
     default:
       return tiles.grass;
   }
@@ -228,6 +184,12 @@ function groundTexFromCode(code: number): PIXI.Texture | null {
 
 export function GameCanvas() {
   const [assetsReady, setAssetsReady] = useState(false);
+  const [activeInteractable, setActiveInteractable] = useAtom(activeInteractableAtom);
+  const [hint, setHint] = useAtom(interactHintAtom);
+  const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
+  const [, setActiveAction] = useAtom(activeInteractableActionAtom);
+  const inventory = useAtomValue(inventoryAtom);
+  const lastCountRef = useRef(inventory.size);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<PIXI.Application | null>(null);
@@ -237,7 +199,6 @@ export function GameCanvas() {
 
   const layersRef = useRef<Layers | null>(null);
 
-  // ✅ PlayerSprite refs
   const playerSpriteRef = useRef<PlayerSprite | null>(null);
   const prevPosRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -250,12 +211,20 @@ export function GameCanvas() {
 
   const map = maps[currentMapId];
 
+  const interactablesRef = useRef<Interactable[]>([]);
+
+    type Interactable = {
+    id: string;
+    aabb: AABB;
+    hint: string;
+    action: { type: "project"; projectId: string } | { type: "dialogue"; lines: string[] };
+  };
+
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       try {
-        // 필요한 것들 로드 (최소)
         await PIXI.Assets.load([cinemaSignPng, villagerManPng]);
       } catch (e) {
         console.warn("[assets] load failed (continuing anyway)", e);
@@ -269,7 +238,6 @@ export function GameCanvas() {
     };
   }, []);
 
-  // 1) Pixi 초기화 (1회)
   useEffect(() => {
     if (appRef.current || !canvasRef.current) return;
 
@@ -303,12 +271,11 @@ export function GameCanvas() {
     cameraLayer.addChild(layers.overlay as any);
     cameraLayer.sortChildren();
 
-    // ✅ PlayerSprite 생성 (Graphics 제거)
     const tex = PIXI.Texture.from(villagerManPng);
     const playerSprite = new PlayerSprite({
       texture: tex,
       tileSize: TILE_SIZE,
-      sizeTiles: 2.2, // 너가 원하는 크기로
+      sizeTiles: 2.2,
       frameW: 32,
       frameH: 32,
       rows: { down: 0, up: 0, right: 1, left: 1 },
@@ -316,8 +283,6 @@ export function GameCanvas() {
       walkCols: [1, 2, 3, 4],
       idleCol: 0,
     });
-
-    console.log("base", tex.width, tex.height, tex.baseTexture.width, tex.baseTexture.height);
 
     playerSprite.setAnimSet(
       makeVillagerAnim({
@@ -328,7 +293,8 @@ export function GameCanvas() {
         verticalRow: 1,
         idleCol: 0,
         walkCols: [0, 1, 2, 3, 4, 5],
-        speed: 0.12,      // 8fps 느낌 더 내고 싶으면 0.18~0.22 사이로 올려봐
+        jumpCols: [0, 1, 2],
+        speed: 0.18,
       })
     );
 
@@ -381,16 +347,17 @@ export function GameCanvas() {
     };
   }, []);
 
-  // 2) 맵/오브젝트 rebuild
   useEffect(() => {
     const cameraLayer = cameraLayerRef.current;
     const layers = layersRef.current;
     const cw = collisionRef.current;
 
-    console.log("[rebuild] fired", { assetsReady, hasMap: !!map, currentMapId });
     if (!cameraLayer || !layers || !cw || !map) return;
 
-    // clear layers
+    interactablesRef.current = [];
+    setActiveInteractable(null);
+    setHint(null);
+
     layers.ground.removeChildren();
     layers.actors.removeChildren();
     layers.buildingDetail.removeChildren();
@@ -399,7 +366,6 @@ export function GameCanvas() {
     cw.clear();
     billboardsRef.current = [];
 
-    // ground tiles
     const tileLayer = new PIXI.Container();
     setDepth(tileLayer as any, "ground");
 
@@ -420,19 +386,39 @@ export function GameCanvas() {
     }
     layers.ground.addChild(tileLayer as any);
 
-    // landmarks/houses
     drawLandmarksAndHouses(
       { building: layers.actors, object: layers.actors, overlay: layers.overlay } as any,
       currentMapId,
       billboardsRef.current
     );
 
-    // ---- church placement ----
+    for (const lm of landmarks) {
+      if (lm.kind !== "board") continue;
+
+      const def = (LANDMARK_DEFS as any)[lm.kind];
+      if (!def) continue;
+
+      const boardFaceX = lm.x - (def.width * TILE_SIZE) / 2;
+      const boardFaceY = lm.y - def.height * TILE_SIZE;
+      const boardFaceW = def.width * TILE_SIZE;
+      const boardFaceH = def.height * TILE_SIZE;
+
+      const offsetX = 6;
+      const offsetY = 6;
+      const bottomOffset = 10;
+
+      const faceX = boardFaceX + offsetX;
+      const faceY = boardFaceY + offsetY + 2;
+      const faceW = boardFaceW - offsetX * 2;
+      const faceH = boardFaceH - offsetY - bottomOffset;
+
+      drawStickyNotesOnBoard(layers.buildingDetail, faceX, faceY, faceW, faceH, 6);
+    }
+
     const churchX = 43 * TILE_SIZE;
     const churchY = 6 * TILE_SIZE;
     addChurchSprite(layers.buildingDetail, churchX, churchY);
 
-    // 교회 collision (너가 넣어둔 방식 유지)
     const CHURCH_W_TILES = 5;
     const churchW = CHURCH_W_TILES * TILE_SIZE;
 
@@ -447,7 +433,6 @@ export function GameCanvas() {
 
     cw.add({ x: boxX, y: boxY, w: boxW, h: boxH });
 
-    // landmarks collision
     for (const lm of landmarks) {
       const def = (LANDMARK_DEFS as any)[lm.kind];
       if (!def) continue;
@@ -458,7 +443,59 @@ export function GameCanvas() {
       cw.add({ x: left, y: top, w: def.width * TILE_SIZE, h: def.height * TILE_SIZE });
     }
 
-    // houses collision
+    const PROJECT_BY_LANDMARK_ID: Record<string, string> = {
+      "lm-cinema": "flickfacts",
+      "lm-computer": "chromeapp",
+      "lm-bank": "crypto",
+      "lm-board": "bento",
+    };
+
+    for (const lm of landmarks) {
+      const def = (LANDMARK_DEFS as any)[lm.kind];
+      if (!def) continue;
+
+      const left = lm.x - (def.width * TILE_SIZE) / 2;
+      const top = lm.y - def.height * TILE_SIZE;
+
+      const doorW = TILE_SIZE * 2.2;
+      const doorH = TILE_SIZE * 1.6;
+
+      const doorX = lm.x - doorW / 2;
+      const doorY = lm.y - doorH;
+
+      const aabb =
+        lm.kind === "board"
+          ? { x: left, y: top, w: TILE_SIZE * def.width, h: TILE_SIZE * (def.height + 1) }
+          : { x: doorX, y: doorY, w: doorW, h: doorH };
+
+      const projectId = PROJECT_BY_LANDMARK_ID[lm.id];
+      if (!projectId) continue;
+      if (lm.kind === "board") {
+        console.log("[board]", { id: lm.id, projectId, aabb, def });
+      }
+
+      interactablesRef.current.push({
+        id: lm.id,
+        aabb,
+        hint: "E : Open",
+        action: { type: "project", projectId },
+      });
+    }
+
+    addChurchSprite(layers.buildingDetail, churchX, churchY);
+
+    interactablesRef.current.push({
+      id: "lm-church",
+      aabb: {
+        x: churchX - TILE_SIZE * 1.2,
+        y: churchY - TILE_SIZE * 1.6,
+        w: TILE_SIZE * 2.4,
+        h: TILE_SIZE * 1.6,
+      },
+      hint: "E : Open",
+      action: { type: "project", projectId: "wedding" },
+    });
+
     for (const h of houses) {
       const houseWidthTiles = h.kind === "orangeS" || h.kind === "blueS" ? 3 : 4;
       const houseHeightTiles = 3;
@@ -472,7 +509,6 @@ export function GameCanvas() {
       cw.add({ x: left, y: top, w: houseWidthTiles * TILE_SIZE, h: houseHeightTiles * TILE_SIZE });
     }
 
-    // scenery + collision (너 코드 그대로)
     const sceneryActors = new PIXI.Container();
     const sceneryOverlay = new PIXI.Container();
 
@@ -628,32 +664,15 @@ export function GameCanvas() {
         cw.add({ x: px, y: py, w: TILE_SIZE, h: TILE_SIZE });
       }
 
-      if (playerSpriteRef.current) {
-        layers.player.addChild(playerSpriteRef.current.sprite as any);
-      }
-
       setCharacterDepthFromWorldY(s as any, py + TILE_SIZE);
       sceneryActors.addChild(s as any);
-
-      if (obj.kind === "board2") {
-        const boardFaceX = px - TILE_SIZE;
-        const boardFaceY = py;
-        const boardFaceW = TILE_SIZE * 3;
-        const boardFaceH = TILE_SIZE * 2;
-
-        const offsetX = 6;
-        const offsetY = 6;
-        const bottomOffset = 10;
-
-        const faceX = boardFaceX + offsetX;
-        const faceY = boardFaceY + offsetY + 2;
-        const faceW = boardFaceW - offsetX * 2;
-        const faceH = boardFaceH - offsetY - bottomOffset;
-
-        drawStickyNotesOnBoard(layers.buildingDetail, faceX, faceY, faceW, faceH, 6);
-      }
     }
 
+    if (playerSpriteRef.current) {
+      layers.player.removeChildren();
+      layers.player.addChild(playerSpriteRef.current.sprite as any);
+    }
+    
     layers.actors.addChild(sceneryActors as any);
     layers.buildingDetail.addChild(sceneryOverlay as any);
 
@@ -662,7 +681,6 @@ export function GameCanvas() {
     layers.overlay.sortChildren();
   }, [currentMapId, map, assetsReady]);
 
-  // 3) 카메라 + 플레이어 업데이트 (Graphics 코드 제거)
   useEffect(() => {
     const cameraLayer = cameraLayerRef.current;
     const ps = playerSpriteRef.current;
@@ -671,7 +689,6 @@ export function GameCanvas() {
     cameraLayer.x = -cameraX;
     cameraLayer.y = WORLD_OFFSET_Y;
 
-    // 위치
     ps.sprite.x = player.x;
     ps.sprite.y = player.y + WORLD_OFFSET_Y;
 
@@ -682,7 +699,6 @@ export function GameCanvas() {
     prevPosRef.current = { x: player.x, y: player.y };
   }, [player.x, player.y, player.dir, player.moving, cameraX]);
 
-  // 4) billboard ticker attach (1회)
   useEffect(() => {
     const app = appRef.current;
     if (!app) return;
@@ -691,19 +707,90 @@ export function GameCanvas() {
     return () => cleanup?.();
   }, []);
 
+  useEffect(() => {
+    if (activeProject) return;
+
+    const app = appRef.current;
+    if (!app) return;
+
+    const update = () => {
+      const ps = playerSpriteRef.current;
+      if (!ps) return;
+
+      const px = ps.sprite.x;
+      const py = ps.sprite.y;
+
+      const probe: AABB = {
+        x: px - TILE_SIZE * 0.6,
+        y: py - TILE_SIZE * 0.9,
+        w: TILE_SIZE * 1.2,
+        h: TILE_SIZE * 0.9,
+      };
+
+      const list = interactablesRef.current;
+      let hit: Interactable | null = null;
+
+      for (const it of list) {
+        if (aabbIntersects(probe, it.aabb)) {
+          hit = it;
+          break;
+        }
+      }
+
+      const nextId = hit ? hit.id : null;
+
+      if (nextId !== activeInteractable) {
+        setActiveInteractable(nextId);
+        setHint(hit ? hit.hint : null);
+        setActiveAction(hit ? hit.action : null);
+      }
+    };
+
+    app.ticker.add(update);
+    return () => {
+      app.ticker.remove(update);
+    };
+  }, [activeInteractable, setActiveInteractable, setHint]);
+
+  useEffect(() => {
+    console.log("현재 인벤토리 크기:", inventory.size);
+
+    if (inventory.size > lastCountRef.current) {
+      const sprite = playerSpriteRef.current;
+      const layers = layersRef.current;
+
+      if (sprite && layers) {
+        const inventoryArray = Array.from(inventory);
+        const lastItemId = inventoryArray[inventoryArray.length - 1];
+
+        const texture = PIXI.Texture.from(PROJECT_INVENTORY_ICONS[lastItemId] || PROJECT_INVENTORY_ICONS[0]);
+
+        playItemAcquiredEffect(
+          layers.player, 
+          sprite.sprite.x, 
+          sprite.sprite.y, 
+          texture
+        );
+      }
+    }
+    lastCountRef.current = inventory.size;
+  }, [inventory]);
+
   return (
-    <canvas
-      id="game-canvas"
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        inset: 0,
-        width: "100vw",
-        height: "100vh",
-        display: "block",
-        imageRendering: "pixelated",
-        zIndex: 0,
-      }}
-    />
+    <div style={{ position: "fixed", inset: 0 }}>
+      <canvas
+        id="game-canvas"
+        ref={canvasRef}
+        style={{
+          position: "fixed",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          display: "block",
+          imageRendering: "pixelated",
+          zIndex: 0,
+        }}
+      />
+    </div>
   );
 }

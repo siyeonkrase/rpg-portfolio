@@ -1,17 +1,11 @@
-// src/game/pixi/townTileset.ts
 import * as PIXI from "pixi.js";
 import tilesetImage from "../../../assets/town_tilemap_packed.png";
 
-// 타일 한 칸 크기 (이 시트는 16x16)
 export const TILESET_TILE_SIZE = 16;
 
-// 한 번만 베이스 텍스처 생성
 const base = PIXI.BaseTexture.from(tilesetImage);
-
-// 픽셀 깨끗하게
 base.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-// (col, row) 로 타일 하나 잘라오는 함수
 export function townSlice(col: number, row: number): PIXI.Texture {
   return new PIXI.Texture(
     base,

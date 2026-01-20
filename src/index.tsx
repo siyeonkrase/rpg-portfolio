@@ -2,8 +2,35 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { createGlobalStyle } from 'styled-components';
+import KennyMiniSquareTtf from "./assets/fonts/KenneyMiniSquare.ttf";
+import KennyMiniTtf from "./assets/fonts/KenneyMini.ttf";
+import MedodicaRegular from "./assets/fonts/MedodicaRegular.otf";
 
 const GlobalStyle = createGlobalStyle`
+@font-face {
+  font-family: 'KenneyMiniSquare';
+  src: url(${KennyMiniSquareTtf}) format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KenneyMini';
+  src: url(${KennyMiniTtf}) format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MedodicaRegular';
+  src: url(${MedodicaRegular}) format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -76,6 +103,10 @@ a {
 }
 .box::-webkit-scrollbar{
   display:none;
+}
+h1{
+  font-family: 'KenneyMiniSquare', sans-serif;
+  letter-spacing: 0.04em;
 }
 `;
 

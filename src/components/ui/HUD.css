@@ -1,0 +1,51 @@
+@keyframes pixel-get-item {
+  0% { transform: scale(1); filter: brightness(1); }
+  25% { transform: scale(1.2); filter: brightness(1.8); }
+  50% { transform: scale(1.1); filter: brightness(1.4); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.hud-container {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 1000;
+}
+
+.inventory-slot {
+  width: 50px;
+  height: 50px;
+  background-color: #d38d65;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 4px;
+  image-rendering: pixelated;
+  box-shadow: 
+    0 -4px 0 0 #3d2b1f, 
+    0 4px 0 0 #3d2b1f, 
+    -4px 0 0 0 #3d2b1f, 
+    4px 0 0 0 #3d2b1f,
+    inset 0 4px 0 0 #e7ab89, 
+    inset 4px 0 0 0 #e7ab89,
+    inset 0 -4px 0 0 #8b5a3c,
+    inset -4px 0 0 0 #8b5a3c;
+}
+
+.inventory-slot.empty {
+  opacity: 0.55;
+}
+
+.inventory-slot.acquired {
+  animation: pixel-get-item 0.5s ease-out;
+}
+
+.inventory-icon {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2));
+}

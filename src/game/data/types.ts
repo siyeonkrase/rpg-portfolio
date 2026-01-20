@@ -1,5 +1,4 @@
-// src/game/data/types.ts
-export type MapId = "town"; // 실제 쓰는 맵 id들로 계속 추가
+export type MapId = "town";
 export type Dir = "down" | "left" | "right" | "up";
 
 export interface PlayerState {
@@ -137,11 +136,9 @@ export type SceneryKind =
   | "displayBoard4"
   | "displayBoard5"
   | "displayBoard6"
-  | "fountain1";
-
-export type SceneryInstance = {
-  kind: SceneryKind;
-  x: number;
-  y: number;
-  mapId: MapId;
-};
+  | "fountain1"
+  | "tomato"
+  | "radish"
+  | "carrot"
+  | "corn"
+  | "carrot2";

@@ -1,4 +1,3 @@
-// src/game/pixi/player/sliceSpriteSheet.ts
 import * as PIXI from "pixi.js";
 
 export function sliceSpriteSheet(

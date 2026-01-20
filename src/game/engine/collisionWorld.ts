@@ -1,4 +1,3 @@
-// src/game/engine/collisionWorld.ts
 import type { AABB, SceneryLike } from "./collisionRules";
 import { collidersForScenery } from "./collisionRules";
 import { scenery, landmarks, houses } from "../data/maps";
@@ -14,20 +13,18 @@ function intersects(a: AABB, b: AABB) {
 export function buildCollisionWorld(mapId: MapId): CollisionWorld {
   const colliders: AABB[] = [];
 
-  // scenery
   for (const s of scenery as unknown as SceneryLike[]) {
     if ((s as any).mapId !== mapId) continue;
     colliders.push(...collidersForScenery(s, TILE_SIZE));
   }
 
-  // landmarks/houses는 너가 이미 “덩어리” 데이터가 있으니 여기서 크게 막기 추천
   for (const lm of landmarks) {
     const box = landmarkCollider(lm.kind, lm.x, lm.y);
     if (box) colliders.push(box);
   }
 
   for (const h of houses) {
-    const px = h.x * TILE_SIZE; // houses는 타일단위 숫자였지
+    const px = h.x * TILE_SIZE;
     const py = h.y * TILE_SIZE;
     const box = houseCollider(h.kind, px, py);
     if (box) colliders.push(box);

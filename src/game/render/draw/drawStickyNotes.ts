@@ -1,4 +1,3 @@
-// src/game/pixi/stickyNotes.ts
 import * as PIXI from "pixi.js";
 
 const POSTIT_COLORS = [
@@ -24,8 +23,6 @@ export function drawStickyNotesOnBoard(
   boardHeight: number,
   count: number = 6
 ) {
-  console.log(count)
-  // 보드 안쪽 여백 (외곽 라인 안쪽부터 시작)
   const padding = 4;
   const POSTIT_SIZE = 10;
   const MIN_DISTANCE  =  14;
@@ -55,7 +52,7 @@ export function drawStickyNotesOnBoard(
     let centerY = 0;
     let tries = 0;
 
-    // ✔ 겹치지 않는 위치 찾기
+    // 겹치지 않는 위치 찾기
     do {
       centerX = innerX + Math.random() * innerW;
       centerY = innerY + Math.random() * innerH;
@@ -68,10 +65,7 @@ export function drawStickyNotesOnBoard(
     const noteX = centerX - POSTIT_SIZE / 2;
     const noteY = centerY - POSTIT_SIZE / 2;
 
-    // 회전은 약간만
     const rotation = (Math.random() - 0.5) * 0.15;
-
-    // 그림자
     const shadow = new PIXI.Graphics();
     shadow.beginFill(0x000000, 0.18);
     shadow.drawRoundedRect(2, 3, POSTIT_SIZE, POSTIT_SIZE, 2);
@@ -80,8 +74,7 @@ export function drawStickyNotesOnBoard(
     shadow.y = noteY;
     shadow.rotation = rotation;
     shadow.zIndex = 1001;
-
-    // 포스트잇 본체
+    
     const borderColor = darken(color, 0.7);
 
     const note = new PIXI.Graphics();

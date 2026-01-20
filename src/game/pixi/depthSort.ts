@@ -1,4 +1,3 @@
-// src/game/pixi/depthSort.ts
 import * as PIXI from "pixi.js";
 
 export type DepthKind =
@@ -8,7 +7,6 @@ export type DepthKind =
   | "character"  // 플레이어, NPC
   | "ui";        // 화면 고정 UI
 
-// 각 레이어끼리 겹치지 않게 base 값만 다르게 줌
 const LAYER_BASE = {
   ground: 0,
   decor: 1_000_000,
@@ -17,7 +15,6 @@ const LAYER_BASE = {
   ui: 10_000_000,
 } as const;
 
-// world / stage에 zIndex 정렬을 켜는 헬퍼
 export function enableDepthSorting(
   world: PIXI.Container,
   stage?: PIXI.Container
@@ -28,7 +25,6 @@ export function enableDepthSorting(
   }
 }
 
-// y(또는 bottomY)를 기준으로 zIndex 계산해주는 헬퍼
 export function setDepth(
   display:
     | (PIXI.DisplayObject & { y?: number; height?: number })
@@ -48,7 +44,6 @@ export function setDepth(
   (display as any).zIndex = base + pivotY;
 }
 
-// 플레이어 Graphics처럼, 그냥 y값만으로 캐릭터 depth 주고 싶을 때
 export function setCharacterDepthFromWorldY(
   display: any,
   worldY: number
