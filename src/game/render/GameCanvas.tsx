@@ -25,6 +25,7 @@ import villagerManPng from "../../assets/MiniVillagerMan.png";
 import { makeVillagerAnim } from "../pixi/player/playerAnims";
 import { playItemAcquiredEffect } from "./draw/ItemEffect";
 import { PROJECT_INVENTORY_ICONS } from "../data/projectInventory";
+import { GAME_ASSET_URLS, preloadImages } from "../data/gameAssets";
 
 const WORLD_OFFSET_Y = 0;
 
@@ -225,9 +226,10 @@ export function GameCanvas() {
 
     (async () => {
       try {
-        await PIXI.Assets.load([cinemaSignPng, villagerManPng]);
+        await preloadImages(GAME_ASSET_URLS);
+        await PIXI.Assets.load(GAME_ASSET_URLS as string[]);
       } catch (e) {
-        console.warn("[assets] load failed (continuing anyway)", e);
+        console.warn("[assets] preload failed (continuing anyway)", e);
       } finally {
         if (!cancelled) setAssetsReady(true);
       }
@@ -237,6 +239,25 @@ export function GameCanvas() {
       cancelled = true;
     };
   }, []);
+
+  
+  // useEffect(() => {
+  //   let cancelled = false;
+
+  //   (async () => {
+  //     try {
+  //       await PIXI.Assets.load([cinemaSignPng, villagerManPng]);
+  //     } catch (e) {
+  //       console.warn("[assets] load failed (continuing anyway)", e);
+  //     } finally {
+  //       if (!cancelled) setAssetsReady(true);
+  //     }
+  //   })();
+
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (appRef.current || !canvasRef.current) return;
@@ -471,7 +492,6 @@ export function GameCanvas() {
       const projectId = PROJECT_BY_LANDMARK_ID[lm.id];
       if (!projectId) continue;
       if (lm.kind === "board") {
-        console.log("[board]", { id: lm.id, projectId, aabb, def });
       }
 
       interactablesRef.current.push({
@@ -753,8 +773,6 @@ export function GameCanvas() {
   }, [activeInteractable, setActiveInteractable, setHint]);
 
   useEffect(() => {
-    console.log("현재 인벤토리 크기:", inventory.size);
-
     if (inventory.size > lastCountRef.current) {
       const sprite = playerSpriteRef.current;
       const layers = layersRef.current;

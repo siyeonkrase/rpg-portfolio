@@ -82,7 +82,12 @@ export function useGameKeyboard() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (uiMode !== "game") return;
+      if (uiMode !== "game") {
+      pressedRef.current = { left: false, right: false, up: false, down: false };
+      setPlayer((p) => ({ ...p, moving: false }));
+      frameId = requestAnimationFrame(loop);
+      return;
+    }
 
       const k = e.key;
 

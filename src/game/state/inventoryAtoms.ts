@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { activeProjectAtom, inventoryAtom, seenProjectsAtom } from "./gameAtoms";
+import { activeProjectAtom, inventoryAtom, seenProjectsAtom, uiModeAtom } from "./gameAtoms";
 
 export const addInventoryAtom = atom(null, (get, set, projectId: string) => {
   const prev = get(inventoryAtom);
@@ -16,12 +16,10 @@ export const resetInventoryAtom = atom(null, (_get, set) => {
 
 export const closeProjectAtom = atom(null, (get, set) => {
   const active = get(activeProjectAtom);
-  console.log("Atom level close trigger - active:", active);
   if (!active) return;
 
   const seen = get(seenProjectsAtom);
   if (!seen[active]) {
-    console.log("Marking as seen and adding to inventory:", active);
     set(seenProjectsAtom, { ...seen, [active]: true });
 
     const inv = get(inventoryAtom);
@@ -31,4 +29,5 @@ export const closeProjectAtom = atom(null, (get, set) => {
   }
 
   set(activeProjectAtom, null);
+  set(uiModeAtom, "game");
 });

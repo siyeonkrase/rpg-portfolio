@@ -13,10 +13,15 @@ import { initSounds } from "../game/utils/soundManager";
 import { InteractionHint } from "../components/ui/InteractionHint";
 
 import { LOGICAL_W, LOGICAL_H } from "../game/data/config";
+import { preloadImages, GAME_ASSETS } from "../game/data/gameAssets";
+import { ManualOverlay } from "../components/ui/ManualOverlay";
 
 export default function GamePage() {
+  useEffect(() => {
+    initSounds();
+  }, []);
+
   useGameKeyboard();
-  initSounds()
 
   const uiMode = useAtomValue(uiModeAtom);
   const setSeen = useSetAtom(seenProjectsAtom);
@@ -26,6 +31,23 @@ export default function GamePage() {
     setSeen({});
     resetInv();
   }, [setSeen, resetInv]);
+
+  useEffect(() => {
+    const urls = [
+      GAME_ASSETS.movieModalPng,
+      GAME_ASSETS.comModalPng,
+      GAME_ASSETS.cryptoModalPng,
+      GAME_ASSETS.weddingModalPng,
+      GAME_ASSETS.kanbanModalPng,
+      GAME_ASSETS.weddingShot,
+      GAME_ASSETS.movieShot,
+      GAME_ASSETS.bentoShot,
+      GAME_ASSETS.chromeShot,
+      GAME_ASSETS.cryptoShot,
+    ];
+    preloadImages(urls);
+  }, []);
+
 
   return (
     <div
@@ -58,6 +80,7 @@ export default function GamePage() {
         <GameCanvas />
         <HUD />
         <InteractionHint />
+        <ManualOverlay />
         {uiMode === "dialogue" && <DialogueBox />}
         {uiMode === "project" && <ProjectModal />}
       </div>

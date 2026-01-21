@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { activeProjectAtom } from "../../game/state/gameAtoms";
 import { closeProjectAtom } from "../../game/state/inventoryAtoms";
+import { GAME_ASSET_URLS } from "../../game/data/gameAssets";
 import styled from "styled-components";
 
 import movieModalPng from "../../assets/modal/movieModal.png"; 
@@ -17,6 +18,33 @@ import chromeShot from "../../assets/screenshots/chrome.png";
 import cryptoShot from "../../assets/screenshots/crypto.png";
 
 type ThemeKey = "movie" | "computer" | "crypto" | "wedding" | "kanban";
+
+function preloadImages(urls: string[]) {
+  return Promise.all(
+    urls.map(
+      (src) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          (img as any).decoding = "async"; // ✅ src 전에
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = src;
+        })
+    )
+  );
+}
+
+// function preloadImages(urls: readonly string[]) {
+//   urls.forEach((src) => {
+//     const img = new Image();
+//     img.decoding = "async";
+//     img.src = src;
+//   });
+// }
+
+// useEffect(() => {
+//   preloadImages(MODAL_ASSET_URLS);
+// }, []);
 
 const ScrollableText = styled.div<{ themeData: ModalTheme }>`
   flex: 1;
@@ -399,6 +427,25 @@ export function ProjectModal() {
 
   const project = activeProject ? PROJECTS[activeProject as ProjectKey] : null;
   const currentTheme = project ? THEMES[project.theme] : THEMES.computer;
+
+  useEffect(() => {
+    const urls = [
+      movieModalPng,
+      comModalPng,
+      cryptoModalPng,
+      weddingModalPng,
+      kanbanModalPng,
+      weddingShot,
+      movieShot,
+      bentoShot,
+      chromeShot,
+      cryptoShot,
+    ];
+
+    preloadImages(urls).then(() => {
+      // console.log("[preload][modal] done", urls.length);
+    });
+  }, []);
 
   useEffect(() => {
     if (!activeProject) return;

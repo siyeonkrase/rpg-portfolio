@@ -5,9 +5,7 @@ import { tiles } from "../tilesets/tileset";
 import { townTiles } from "../tilesets/townTileset";
 import { cityTiles } from "../tilesets/cityTileset";
 import { setDepth } from "../../pixi/depthSort";
-import cinemaSignPng from "../../../assets/cinemaSign.png"
-import computerSignPng from "../../../assets/computerSign.png"
-import churchPng from "../../../assets/churchPng.png"
+import { GAME_ASSETS } from "../../data/gameAssets";
 
 export type PriceCell = { text: PIXI.Text; row: number; col: number };
 
@@ -168,7 +166,7 @@ function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWor
 }
 
 export function addChurchSprite(container: PIXI.Container, worldX: number, groundY: number) {
-  const tex = PIXI.Texture.from(churchPng);
+  const tex = PIXI.Texture.from(GAME_ASSETS.churchBuilding);
   tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
   const s = new PIXI.Sprite(tex);
@@ -336,7 +334,7 @@ export function drawLandmarksAndHouses(
     if (lm.kind === "cinema") {
       const sign = addLandmarkSpriteBillboard(layers.overlay, worldX, groundY, billboards, {
         landmarkKind: "cinema",
-        texture: PIXI.Texture.from(cinemaSignPng),
+        texture: PIXI.Texture.from(GAME_ASSETS.cinemaSign),
         widthRatio: 0.9,
         offsetX: 0,
         offsetY: 0,
@@ -348,7 +346,7 @@ export function drawLandmarksAndHouses(
     if (lm.kind === "computer") {
       addLandmarkSpriteBillboard(layers.overlay, lm.x, lm.y, billboards, {
         landmarkKind: "computer",
-        texture: PIXI.Texture.from(computerSignPng),
+        texture: PIXI.Texture.from(GAME_ASSETS.computerSign),
         widthRatio: 1.3,
         offsetY: -30,
         hoverAmpTiles: 0,

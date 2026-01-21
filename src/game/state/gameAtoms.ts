@@ -38,3 +38,25 @@ export type InteractAction =
   | { type: "dialogue"; lines: string[] };
 
 export const activeInteractableActionAtom = atom<InteractAction | null>(null);
+
+const INTRO_SEEN_KEY = "rpg_portfolio_intro";
+
+export const manualOpenAtom = atom<boolean>(false);
+
+export const hydrateIntroSeenAtom = atom(null, (_get, set) => {
+  try {
+    const seen = localStorage.getItem(INTRO_SEEN_KEY) === "1";
+    set(manualOpenAtom, seen);
+  } catch {
+    // ignore
+  }
+});
+
+export const markIntroSeenAtom = atom(null, (_get, set) => {
+  set(manualOpenAtom, true);
+  try {
+    localStorage.setItem(INTRO_SEEN_KEY, "1");
+  } catch {
+    // ignore
+  }
+});

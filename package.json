@@ -49,5 +49,8 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://siyeonkrase.github.io/rpg-portfolio/"
+  "homepage": "https://siyeonkrase.github.io/rpg-portfolio",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
 }
