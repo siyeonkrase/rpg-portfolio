@@ -1,46 +1,93 @@
-# Getting Started with Create React App
+# 🕹️ RPG Portfolio World (In Progress)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive **2D RPG-style portfolio website** built with **React + Pixi.js**, where users explore a town-like world and discover projects through in-game interactions.
 
-## Available Scripts
+Instead of scrolling through a traditional portfolio, visitors walk through a pixel-art world, interact with landmarks, and open project modals directly inside the game environment.
 
-In the project directory, you can run:
+> 🚧 **This project is currently in active development.**
+> Core gameplay and interaction systems are in place, and new features, polish, and content are being added continuously.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 🌍 Live Demo
+👉 https://siyeonkrase.github.io/rpg-portfolio/#/
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+---
 
-### `npm test`
+## 🖥 Platform Notes
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project is currently designed for **desktop / PC environments only**.
 
-### `npm run build`
+- Keyboard input (WASD / Arrow keys) is required.
+- The experience is not optimized for mobile or touch devices.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🎮 Key Features
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Top-down 2D RPG world** rendered with Pixi.js
+- **Keyboard-based movement & camera tracking**
+- **Collision system** using foot-based AABB detection
+- **Interactive landmarks** (Press `E` to interact)
+- **Project modals** launched from in-world objects
+- **Inventory-style HUD** that fills as projects are viewed
+- **Depth sorting** for proper sprite layering
+- **Pixel-perfect rendering** with integer scaling
+- **Sound effects & visual feedback** for interactions
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🧱 Current Interactive Locations
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- 🎬 Cinema – Project showcase
+- 🏦 Bank – Finance / crypto project
+- 💻 Computer – Web app project
+- 🪧 Community Board – Bento-style project hub
+- 💒 Church – Wedding invitation website
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Each interaction unlocks an icon in the inventory HUD, reinforcing progression and exploration.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+---
 
-## Learn More
+## 🛠️ Tech Stack
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **React.js**
+- **TypeScript**
+- **Pixi.js**
+- **Jotai** (state management)
+- **styled-components**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+## 🗺️ Architecture Highlights
+
+- Custom **rendering layer system** (ground / actors / building details / player / overlay)
+- Global **collision world** shared between rendering and input systems
+- Decoupled **interaction system** with probe-based AABB detection
+- Keyboard logic abstracted via `useGameKeyboard`
+- Modal state handled centrally to avoid inconsistent UI transitions
+
+---
+
+## 🎨 Assets & Credits
+
+This project uses third-party assets provided by the following creators and platforms. All assets are used for non-commercial, portfolio purposes.
+
+### Fonts & Tile Sets
+- **Kenney.nl**
+  https://kenney.nl/  
+  Fonts and pixel-art tile sets used throughout the game world.
+
+### Character Sprites
+- **Mini Villagers Pack by Lyaseek**
+  https://lyaseek.itch.io/minifvillagers  
+  Player character sprites.
+
+### Sound Effects
+- **Pixabay (User: joentnt)**
+  https://pixabay.com/users/joentnt-47713256/  
+  Footstep and interaction sound effects.
+
+All rights remain with their respective creators.
+
+Thanks for exploring! More updates coming soon 👀✨
