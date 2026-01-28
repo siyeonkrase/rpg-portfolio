@@ -106,7 +106,7 @@ export default function Router() {
               <InfoBox>
                 <Body>
                   Explore the town and collect all <b>5 items</b><br/>
-                  by interacting with objects.
+                  by interacting with highlighted objects.
 
                   <div style={{ display: 'block', textAlign: 'center' }}>
                     <ul>

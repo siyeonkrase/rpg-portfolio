@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 
 import { GameCanvas } from "../game/render/GameCanvas";
@@ -14,14 +14,11 @@ import { InteractionHint } from "../components/ui/InteractionHint";
 
 import { LOGICAL_W, LOGICAL_H } from "../game/data/config";
 import { preloadImages, GAME_ASSETS } from "../game/data/gameAssets";
-import { ManualOverlay } from "../components/ui/ManualOverlay";
+import { Manual } from "../components/ui/Manual";
+import { Loading } from "../components/ui/Loading";
 
 export default function GamePage() {
-  useEffect(() => {
-    initSounds();
-  }, []);
-
-  useGameKeyboard();
+  const [isLoading, setIsLoading] = useState(true);
 
   const uiMode = useAtomValue(uiModeAtom);
   const setSeen = useSetAtom(seenProjectsAtom);
@@ -33,21 +30,41 @@ export default function GamePage() {
   }, [setSeen, resetInv]);
 
   useEffect(() => {
-    const urls = [
-      GAME_ASSETS.movieModalPng,
-      GAME_ASSETS.comModalPng,
-      GAME_ASSETS.cryptoModalPng,
-      GAME_ASSETS.weddingModalPng,
-      GAME_ASSETS.kanbanModalPng,
-      GAME_ASSETS.weddingShot,
-      GAME_ASSETS.movieShot,
-      GAME_ASSETS.bentoShot,
-      GAME_ASSETS.chromeShot,
-      GAME_ASSETS.cryptoShot,
-    ];
-    preloadImages(urls);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const urls = [
+        GAME_ASSETS.movieModalPng,
+        GAME_ASSETS.comModalPng,
+        GAME_ASSETS.cryptoModalPng,
+        GAME_ASSETS.weddingModalPng,
+        GAME_ASSETS.kanbanModalPng,
+        GAME_ASSETS.weddingShot,
+        GAME_ASSETS.movieShot,
+        GAME_ASSETS.bentoShot,
+        GAME_ASSETS.chromeShot,
+        GAME_ASSETS.cryptoShot,
+        ];
+
+        await preloadImages(urls);
+
+        if (!cancelled) setIsLoading(false);
+      } catch {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  useEffect(() => {
+    if (!isLoading) initSounds();
+  }, [isLoading]);
+
+  useGameKeyboard();
 
   return (
     <div
@@ -80,9 +97,10 @@ export default function GamePage() {
         <GameCanvas />
         <HUD />
         <InteractionHint />
-        <ManualOverlay />
+        <Manual />
         {uiMode === "dialogue" && <DialogueBox />}
         {uiMode === "project" && <ProjectModal />}
+        {isLoading && <Loading />}
       </div>
     </div>
   );

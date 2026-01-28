@@ -1,4 +1,5 @@
-export type AABB = { x: number; y: number; w: number; h: number };
+import type { AABB } from "./aabb";
+
 export type SceneryLike = {
   id?: string;
   kind: string;

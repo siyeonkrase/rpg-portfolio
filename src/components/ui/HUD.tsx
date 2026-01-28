@@ -10,25 +10,20 @@ import manualIcon from "../../assets/manualIcon.png"
 const SLOTS = ["flickfacts", "chromeapp", "crypto", "wedding", "bento"] as const;
 
 const bounceTriplet = keyframes`
-  0% { transform: translateY(0) scale(1); }
+  0%, 100% { transform: translateY(0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
 
-  5%   { transform: translateY(-12px) scaleX(0.9) scaleY(1.1); }
-  10%  { transform: translateY(0) scaleX(1.05) scaleY(0.9); }
+  7%   { transform: translateY(-30px) scaleX(0.85) scaleY(1.2); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
+  14%  { transform: translateY(0) scaleX(1.2) scaleY(0.75); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
+  17%  { transform: translateY(0) scaleX(1) scaleY(1); }
 
-  16%  { transform: translateY(-25px) scaleX(0.8) scaleY(1.2); }
-  21% { transform: translateY(0) scaleX(1.1) scaleY(0.8); }
-  23%  { transform: translateY(0) scaleX(1.05) scaleY(0.9); }
+  23%  { transform: translateY(-15px) scaleX(0.9) scaleY(1.1); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
+  29%  { transform: translateY(0) scaleX(1.1) scaleY(0.85); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
 
-  28%  { transform: translateY(-12px) scaleX(0.9) scaleY(1.1); }
-  33%  { transform: translateY(0) scaleX(1.05) scaleY(0.9); }
+  34%  { transform: translateY(-8px) scaleX(0.95) scaleY(1.05); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
+  39%  { transform: translateY(0) scaleX(1.05) scaleY(0.95); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1); }
 
-  38%  { transform: translateY(-4px); }
-  41%  { transform: translateY(0); }
-  44%  { transform: translateY(-2px); }
-  47%  { transform: translateY(0); }
-  50%  { transform: translateY(-1px); }
-  53%  { transform: translateY(0); }
-
+  44%  { transform: translateY(-3px); }
+  48%  { transform: translateY(0); }
   100% { transform: translateY(0); }
 `;
 
@@ -51,7 +46,7 @@ const Wrap = styled.button`
   cursor: pointer;
   user-select: none;
 
-  animation: ${bounceTriplet} 3s ease-in-out infinite;
+  animation: ${bounceTriplet} 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 
   &:hover {
     filter: brightness(1.1);

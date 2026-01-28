@@ -105,7 +105,7 @@ const Btn = styled.button`
   }
 `;
 
-export function ManualOverlay() {
+export function Manual() {
   const isOpen = useAtomValue(manualOpenAtom);
   const setOpen = useSetAtom(manualOpenAtom);
   const setUiMode = useSetAtom(uiModeAtom);
@@ -138,7 +138,7 @@ export function ManualOverlay() {
         <Title>HOW TO PLAY</Title>
         <Body>
           Explore the town and collect all <b>5 items</b><br/>
-          by interacting with buildings.
+          by interacting with highlighted objects.
           <ul>
             <li><span>Move</span> <span>WASD / ARROWS</span></li>
             <li><span>Interact</span> <span>E</span></li>

@@ -1,4 +1,5 @@
-import type { AABB, SceneryLike } from "./collisionRules";
+import type { SceneryLike } from "./collisionRules";
+import type { AABB } from "./aabb";
 import { collidersForScenery } from "./collisionRules";
 import { scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE } from "../data/config";

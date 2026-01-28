@@ -25,7 +25,7 @@ function preloadImages(urls: string[]) {
       (src) =>
         new Promise<void>((resolve) => {
           const img = new Image();
-          (img as any).decoding = "async"; // ✅ src 전에
+          (img as any).decoding = "async";
           img.onload = () => resolve();
           img.onerror = () => resolve();
           img.src = src;
@@ -33,18 +33,6 @@ function preloadImages(urls: string[]) {
     )
   );
 }
-
-// function preloadImages(urls: readonly string[]) {
-//   urls.forEach((src) => {
-//     const img = new Image();
-//     img.decoding = "async";
-//     img.src = src;
-//   });
-// }
-
-// useEffect(() => {
-//   preloadImages(MODAL_ASSET_URLS);
-// }, []);
 
 const ScrollableText = styled.div<{ themeData: ModalTheme }>`
   flex: 1;

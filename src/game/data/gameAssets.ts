@@ -19,6 +19,8 @@ import bentoShot from "../../assets/screenshots/bento.png";
 import chromeShot from "../../assets/screenshots/chrome.png";
 import cryptoShot from "../../assets/screenshots/crypto.png";
 
+import villagerManPng from "../../assets/MiniVillagerMan.png";
+
 export const GAME_ASSETS = {
   churchBuilding,
   cinemaSign,
@@ -38,6 +40,7 @@ export const GAME_ASSETS = {
   bentoShot,
   chromeShot,
   cryptoShot,
+  villagerManPng,
 } as const;
 
 export const GAME_ASSET_URLS = Object.values(GAME_ASSETS);

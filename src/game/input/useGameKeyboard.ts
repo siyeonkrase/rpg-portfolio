@@ -1,21 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import {
-  playerAtom,
-  cameraXAtom,
-  currentMapIdAtom,
-  uiModeAtom,
-  activeProjectAtom,
-  activeInteractableActionAtom,
-} from "../state/gameAtoms";
+import type { AABB } from "../engine/aabb";
+import { playerAtom, cameraXAtom, currentMapIdAtom, uiModeAtom, activeProjectAtom, activeInteractableActionAtom } from "../state/gameAtoms";
 import { closeProjectAtom } from "../state/inventoryAtoms";
-
-import {
-  TILE_SIZE,
-  VIEWPORT_WIDTH_TILES,
-  VIEWPORT_HEIGHT_TILES,
-  MOVE_SPEED,
-} from "../data/config";
+import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES, MOVE_SPEED } from "../data/config";
 import { maps } from "../data/maps";
 import type { PlayerState } from "../data/types";
 import { playStepByCoords } from "../utils/soundManager";
@@ -24,8 +12,6 @@ const VIEWPORT_WIDTH_PX = VIEWPORT_WIDTH_TILES * TILE_SIZE;
 const VIEWPORT_HEIGHT_PX = VIEWPORT_HEIGHT_TILES * TILE_SIZE;
 
 type PressState = { left: boolean; right: boolean; up: boolean; down: boolean };
-
-export type AABB = { x: number; y: number; w: number; h: number };
 
 const FOOT_W = TILE_SIZE * 0.45;
 const FOOT_H = TILE_SIZE * 0.25;

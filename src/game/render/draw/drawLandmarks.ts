@@ -98,6 +98,12 @@ type LandmarkDef = {
   rows: (PIXI.Texture | null)[][];
 };
 
+export const DOOR_TILE_IDS_BY_LANDMARK_ID: Record<string, string[]> = {
+  "lm-cinema": ["cinema-door-main"],
+  "lm-computer": ["pc-door-l", "pc-door-r"],
+  "lm-bank": ["bank-door-l", "bank-door-r"],
+};
+
 export const LANDMARK_DEFS: Record<LandmarkKind, LandmarkDef> = {
   cinema: {
     width: 6,
@@ -314,7 +320,7 @@ export function drawLandmarksAndHouses(
     overlay: PIXI.Container;
   },
   currentMapId: string | number,
-  billboards: BillboardInfo[]
+  billboards: BillboardInfo[],
 ) {
   landmarks.forEach((lm) => {
     const def = LANDMARK_DEFS[lm.kind];

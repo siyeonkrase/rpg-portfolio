@@ -4,28 +4,23 @@ import { useAtom, useAtomValue } from "jotai";
 import { currentMapIdAtom, playerAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom } from "../state/gameAtoms";
 import { maps, scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE, LOGICAL_W, LOGICAL_H } from "../data/config";
-
 import { tiles } from "../render/tilesets/tileset";
 import { townTiles } from "../render/tilesets/townTileset";
 import { cityTiles } from "../render/tilesets/cityTileset";
-import {
-  drawLandmarksAndHouses,
-  attachBillboardTicker,
-  type BillboardInfo,
-  LANDMARK_DEFS,
-  addChurchSprite,
-} from "../render/draw/drawLandmarks";
-
+import { drawLandmarksAndHouses, attachBillboardTicker, type BillboardInfo, LANDMARK_DEFS, addChurchSprite, DOOR_TILE_IDS_BY_LANDMARK_ID } from "../render/draw/drawLandmarks";
 import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../pixi/depthSort";
 import { drawStickyNotesOnBoard } from "../render/draw/drawStickyNotes";
-import cinemaSignPng from "../../assets/cinemaSign.png";
-
 import { PlayerSprite } from "../pixi/player/PlayerSprite";
 import villagerManPng from "../../assets/MiniVillagerMan.png";
 import { makeVillagerAnim } from "../pixi/player/playerAnims";
 import { playItemAcquiredEffect } from "./draw/ItemEffect";
 import { PROJECT_INVENTORY_ICONS } from "../data/projectInventory";
 import { GAME_ASSET_URLS, preloadImages } from "../data/gameAssets";
+import type { AABB } from "../engine/aabb";
+import { aabbIntersects } from "../engine/aabb";
+import { createHighlight, tickHighlights, type HighlightHandle } from "../render/draw/drawHighlight";
+import { aabbFromDoorTiles } from "../engine/door";
+import type { DoorTile } from "../engine/door";
 
 const WORLD_OFFSET_Y = 0;
 
@@ -52,10 +47,20 @@ function isBuildingDetailKind(kind: string) {
   return BUILDING_DETAIL_KINDS.has(kind);
 }
 
-type AABB = { x: number; y: number; w: number; h: number };
-function aabbIntersects(a: AABB, b: AABB) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-}
+type Layers = {
+  ground: PIXI.Container;
+  actors: PIXI.Container;
+  buildingDetail: PIXI.Container;
+  player: PIXI.Container;
+  overlay: PIXI.Container;
+};
+
+type Interactable = {
+  id: string;
+  aabb: AABB;
+  hint: string;
+  action: { type: "project"; projectId: string } | { type: "dialogue"; lines: string[] };
+};
 
 class CollisionWorld {
   solids: AABB[] = [];
@@ -70,14 +75,6 @@ class CollisionWorld {
     return false;
   }
 }
-
-type Layers = {
-  ground: PIXI.Container;
-  actors: PIXI.Container;
-  buildingDetail: PIXI.Container;
-  player: PIXI.Container;
-  overlay: PIXI.Container;
-};
 
 function createLayers(): Layers {
   const ground = new PIXI.Container();
@@ -183,14 +180,20 @@ function groundTexFromCode(code: number): PIXI.Texture | null {
   }
 }
 
+function findDoorTilesByIds(ids: string[]): DoorTile[] {
+  return scenery.filter((o: any) => ids.includes(o.id)) as DoorTile[];
+}
+
 export function GameCanvas() {
   const [assetsReady, setAssetsReady] = useState(false);
   const [activeInteractable, setActiveInteractable] = useAtom(activeInteractableAtom);
   const [hint, setHint] = useAtom(interactHintAtom);
   const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
   const [, setActiveAction] = useAtom(activeInteractableActionAtom);
+
   const inventory = useAtomValue(inventoryAtom);
   const lastCountRef = useRef(inventory.size);
+  const inventoryRef = useRef<Set<string>>(new Set());
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<PIXI.Application | null>(null);
@@ -206,6 +209,9 @@ export function GameCanvas() {
   const billboardsRef = useRef<BillboardInfo[]>([]);
   const collisionRef = useRef<CollisionWorld | null>(null);
 
+  const highlightsRef = useRef<HighlightHandle[]>([]);
+  const boardFaceRef = useRef<Record<string, AABB>>({});
+
   const currentMapId = useAtomValue(currentMapIdAtom);
   const player = useAtomValue(playerAtom);
   const cameraX = useAtomValue(cameraXAtom);
@@ -213,13 +219,6 @@ export function GameCanvas() {
   const map = maps[currentMapId];
 
   const interactablesRef = useRef<Interactable[]>([]);
-
-    type Interactable = {
-    id: string;
-    aabb: AABB;
-    hint: string;
-    action: { type: "project"; projectId: string } | { type: "dialogue"; lines: string[] };
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -239,25 +238,6 @@ export function GameCanvas() {
       cancelled = true;
     };
   }, []);
-
-  
-  // useEffect(() => {
-  //   let cancelled = false;
-
-  //   (async () => {
-  //     try {
-  //       await PIXI.Assets.load([cinemaSignPng, villagerManPng]);
-  //     } catch (e) {
-  //       console.warn("[assets] load failed (continuing anyway)", e);
-  //     } finally {
-  //       if (!cancelled) setAssetsReady(true);
-  //     }
-  //   })();
-
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, []);
 
   useEffect(() => {
     if (appRef.current || !canvasRef.current) return;
@@ -384,6 +364,9 @@ export function GameCanvas() {
     layers.buildingDetail.removeChildren();
     layers.overlay.removeChildren();
 
+    for (const h of highlightsRef.current) h.destroy();
+    highlightsRef.current = [];
+
     cw.clear();
     billboardsRef.current = [];
 
@@ -413,6 +396,8 @@ export function GameCanvas() {
       billboardsRef.current
     );
 
+    boardFaceRef.current = {};
+
     for (const lm of landmarks) {
       if (lm.kind !== "board") continue;
 
@@ -424,9 +409,9 @@ export function GameCanvas() {
       const boardFaceW = def.width * TILE_SIZE;
       const boardFaceH = def.height * TILE_SIZE;
 
-      const offsetX = 6;
-      const offsetY = 6;
-      const bottomOffset = 10;
+      const offsetX = 2;
+      const offsetY = 0;
+      const bottomOffset = 4;
 
       const faceX = boardFaceX + offsetX;
       const faceY = boardFaceY + offsetY + 2;
@@ -434,6 +419,8 @@ export function GameCanvas() {
       const faceH = boardFaceH - offsetY - bottomOffset;
 
       drawStickyNotesOnBoard(layers.buildingDetail, faceX, faceY, faceW, faceH, 6);
+
+      boardFaceRef.current[lm.id] = { x: faceX, y: faceY, w: faceW, h: faceH };
     }
 
     const churchX = 43 * TILE_SIZE;
@@ -475,24 +462,28 @@ export function GameCanvas() {
       const def = (LANDMARK_DEFS as any)[lm.kind];
       if (!def) continue;
 
-      const left = lm.x - (def.width * TILE_SIZE) / 2;
-      const top = lm.y - def.height * TILE_SIZE;
+      let aabb: AABB;
 
-      const doorW = TILE_SIZE * 2.2;
-      const doorH = TILE_SIZE * 1.6;
-
-      const doorX = lm.x - doorW / 2;
-      const doorY = lm.y - doorH;
-
-      const aabb =
-        lm.kind === "board"
-          ? { x: left, y: top, w: TILE_SIZE * def.width, h: TILE_SIZE * (def.height + 1) }
-          : { x: doorX, y: doorY, w: doorW, h: doorH };
+      if (lm.kind === "board") {
+        const b = def.interactBox ?? { x: -1.5, y: -2.0, w: 3.0, h: 3.0 };
+        aabb = {
+          x: lm.x + b.x * TILE_SIZE,
+          y: lm.y + b.y * TILE_SIZE,
+          w: b.w * TILE_SIZE,
+          h: b.h * TILE_SIZE,
+        };
+      } else {
+        const d = def.doorBox ?? { x: -1.1, y: -1.6, w: 2.2, h: 1.6 };
+        aabb = {
+          x: lm.x + d.x * TILE_SIZE,
+          y: lm.y + d.y * TILE_SIZE,
+          w: d.w * TILE_SIZE,
+          h: d.h * TILE_SIZE,
+        };
+      }
 
       const projectId = PROJECT_BY_LANDMARK_ID[lm.id];
       if (!projectId) continue;
-      if (lm.kind === "board") {
-      }
 
       interactablesRef.current.push({
         id: lm.id,
@@ -500,6 +491,31 @@ export function GameCanvas() {
         hint: "E : Open",
         action: { type: "project", projectId },
       });
+
+      const face = boardFaceRef.current[lm.id];
+
+      const doorIds = DOOR_TILE_IDS_BY_LANDMARK_ID[lm.id];
+      const doorTiles = doorIds ? findDoorTilesByIds(doorIds) : [];
+      const doorBox = doorTiles.length ? aabbFromDoorTiles(doorTiles, lm.id === "lm-bank" ? 0 : 2) : null;
+
+      let highlightBox = lm.kind === "board" && face ? face : doorBox ?? aabb;
+
+        if (lm.id === "lm-bank") {
+          const leftTrim = 4;
+          const rightTrim = 2;
+
+          highlightBox = {
+            x: highlightBox.x + leftTrim,
+            y: highlightBox.y,
+            w: highlightBox.w - leftTrim - rightTrim,
+            h: highlightBox.h,
+          };
+        }
+
+
+      highlightsRef.current.push(
+        createHighlight(layers.buildingDetail, projectId, highlightBox, { pad: 0 })
+      );
     }
 
     addChurchSprite(layers.buildingDetail, churchX, churchY);
@@ -515,6 +531,17 @@ export function GameCanvas() {
       hint: "E : Open",
       action: { type: "project", projectId: "wedding" },
     });
+
+    const churchDoorBox: AABB = {
+      x: churchX - TILE_SIZE * 0.55,
+      y: churchY - TILE_SIZE * 1.75,
+      w: TILE_SIZE * 1.1,
+      h: TILE_SIZE * 1.4,
+    };
+
+    highlightsRef.current.push(
+      createHighlight(layers.buildingDetail, "wedding", churchDoorBox, { pad: 0 })
+    );
 
     for (const h of houses) {
       const houseWidthTiles = h.kind === "orangeS" || h.kind === "blueS" ? 3 : 4;
@@ -728,6 +755,20 @@ export function GameCanvas() {
   }, []);
 
   useEffect(() => {
+    const app = appRef.current;
+    if (!app) return;
+
+    const tick = (delta: number) => {
+      tickHighlights(highlightsRef.current, delta);
+    };
+
+    app.ticker.add(tick);
+    return () => {
+      app.ticker.remove(tick);
+    };
+  }, []);
+
+  useEffect(() => {
     if (activeProject) return;
 
     const app = appRef.current;
@@ -773,6 +814,13 @@ export function GameCanvas() {
   }, [activeInteractable, setActiveInteractable, setHint]);
 
   useEffect(() => {
+    for (const h of highlightsRef.current) {
+      h.setVisible(!inventory.has(h.projectId));
+    }
+  }, [inventory]);
+
+
+  useEffect(() => {
     if (inventory.size > lastCountRef.current) {
       const sprite = playerSpriteRef.current;
       const layers = layersRef.current;
@@ -792,7 +840,15 @@ export function GameCanvas() {
       }
     }
     lastCountRef.current = inventory.size;
+    inventoryRef.current = inventory;
   }, [inventory]);
+
+  useEffect(() => {
+    return () => {
+      for (const h of highlightsRef.current) h.destroy();
+      highlightsRef.current = [];
+    };
+  }, []);
 
   return (
     <div style={{ position: "fixed", inset: 0 }}>
