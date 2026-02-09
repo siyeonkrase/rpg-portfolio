@@ -20,7 +20,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle, #1a1a2e 0%, #020202 100%); /* 단순 검정보다 깊이감 있음 */
+  background: radial-gradient(circle, #1a1a2e 0%, #020202 100%);
   color: #fff;
   text-align: center;
   padding: 20px;
@@ -31,7 +31,7 @@ const Title = styled.h1`
   font-size: 48px;
   margin-bottom: 30px;
   color: #fff;
-  text-shadow: 4px 4px 0px #3f5efb, 8px 8px 0px rgba(0,0,0,0.5); /* 픽셀 게임 스타일 그림자 */
+  text-shadow: 4px 4px 0px #3f5efb, 8px 8px 0px rgba(0,0,0,0.5);
   letter-spacing: 2px;
 `;
 
@@ -41,7 +41,7 @@ const InfoBox = styled.div`
   border-radius: 12px;
   padding: 30px;
   max-width: 500px;
-  backdrop-filter: blur(5px); /* 배경 살짝 흐리게 해서 고급스럽게 */
+  backdrop-filter: blur(5px);
 `;
 
 const Body = styled.div`
@@ -119,7 +119,6 @@ const SoundToggle = styled.div`
   }
 
   &:hover {
-    /* background: #3f5efb; */
     border-color: #fff;
     transform: scale(1.1);
   }
@@ -132,7 +131,6 @@ export default function Router() {
     if (soundEnabled) {
       sound.unmuteAll();
     } else {
-      // 소리를 끌 때 현재 재생 중인 소리도 즉시 멈추고 뮤트 처리
       sound.stopAll(); 
       sound.muteAll();
     }
