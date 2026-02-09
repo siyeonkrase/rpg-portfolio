@@ -1,7 +1,8 @@
 {
   "files": {
-    "main.css": "/rpg-portfolio/static/css/main.b9c1c014.css",
-    "main.js": "/rpg-portfolio/static/js/main.f8c18816.js",
+    "main.css": "/rpg-portfolio/static/css/main.bc045100.css",
+    "main.js": "/rpg-portfolio/static/js/main.d0e41714.js",
+    "static/media/bgm_town.mp3": "/rpg-portfolio/static/media/bgm_town.1c1f3bd4bbb8c7a1b876.mp3",
     "static/media/computerSign.png": "/rpg-portfolio/static/media/computerSign.137b91c5cc5bec26f3b9.png",
     "static/media/cinemaSign.png": "/rpg-portfolio/static/media/cinemaSign.603ee2cd1110a3e7964b.png",
     "static/media/chrome.png": "/rpg-portfolio/static/media/chrome.40e44aa5c3efa6186e47.png",
@@ -20,12 +21,14 @@
     "static/media/kanbanModal.png": "/rpg-portfolio/static/media/kanbanModal.955e948445f59fca7cce.png",
     "static/media/movie.png": "/rpg-portfolio/static/media/movie.9a9d8464839960faf365.png",
     "static/media/walkonpath.mp3": "/rpg-portfolio/static/media/walkonpath.a4797f63930a1cb46db3.mp3",
+    "static/media/master.mp3": "/rpg-portfolio/static/media/master.f65684e8e91f5683f947.mp3",
     "static/media/note.png": "/rpg-portfolio/static/media/note.155962ae5c7b7263838e.png",
     "static/media/coin.mp3": "/rpg-portfolio/static/media/coin.a48621223608c3c31630.mp3",
     "static/media/MedodicaRegular.otf": "/rpg-portfolio/static/media/MedodicaRegular.95749ec5a65afd44d159.otf",
     "static/media/KenneyMini.ttf": "/rpg-portfolio/static/media/KenneyMini.8873d1d1ba6b307c0880.ttf",
     "static/media/KenneyMiniSquare.ttf": "/rpg-portfolio/static/media/KenneyMiniSquare.63ed8a3ccd4e69ca2985.ttf",
     "static/media/city_tilemap_packed.png": "/rpg-portfolio/static/media/city_tilemap_packed.3ac41c08fbbfa9ac1363.png",
+    "static/media/itemspinning.mp3": "/rpg-portfolio/static/media/itemspinning.db706070c4bb5598a0bf.mp3",
     "static/media/town_tilemap_packed.png": "/rpg-portfolio/static/media/town_tilemap_packed.c7a6ed0381d9a08598aa.png",
     "static/media/walkongrass3.mp3": "/rpg-portfolio/static/media/walkongrass3.dbf21bc9aa5ac89f5b3c.mp3",
     "static/media/walkondirt2.mp3": "/rpg-portfolio/static/media/walkondirt2.2801582d39739b998f20.mp3",
@@ -34,11 +37,11 @@
     "static/media/walkondirt3.mp3": "/rpg-portfolio/static/media/walkondirt3.60974b70b459a38a1a2f.mp3",
     "static/media/walkongrass2.mp3": "/rpg-portfolio/static/media/walkongrass2.5c2b1c44989ee1257812.mp3",
     "index.html": "/rpg-portfolio/index.html",
-    "main.b9c1c014.css.map": "/rpg-portfolio/static/css/main.b9c1c014.css.map",
-    "main.f8c18816.js.map": "/rpg-portfolio/static/js/main.f8c18816.js.map"
+    "main.bc045100.css.map": "/rpg-portfolio/static/css/main.bc045100.css.map",
+    "main.d0e41714.js.map": "/rpg-portfolio/static/js/main.d0e41714.js.map"
   },
   "entrypoints": [
-    "static/css/main.b9c1c014.css",
-    "static/js/main.f8c18816.js"
+    "static/css/main.bc045100.css",
+    "static/js/main.d0e41714.js"
   ]
 }
