@@ -3,18 +3,18 @@ import type { MapId, MapData, SceneryKind } from "./types";
 
 function createEmptyCity(): number[][] {
   const tiles: number[][] = [
-    [1, 1, 1, 1, 2, 1, 2, 3, 1, 1, 1, 1, 1, 10, 8, 8, 12, 3, 1, 2, 2, 1, 2, 3, 1, 1, 1, 1, 1, 1, 2, 10, 8, 8, 1, 1, 1, 1, 2, 3, 2, 1, 3, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 10, 12, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 10, 12, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 13, 1, 2, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 2, 1, 3, 1, 2, 13, 13, 13, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 13, 1, 2, 1, 13, 13, 1, 1, 1, 13, 13, 1, 3, 2, 13, 13, 1, 13, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 2, 2, 1, 1, 1, 1, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 13, 2, 1, 13, 2, 1, 1, 1, 1, 2, 3, 13, 1, 13, 13, 2, 13, 13, 13, 13, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 3, 1, 13, 2, 1, 2, 3, 13, 13, 2, 3, 1, 1, 1, 1, 1, 2, 2, 13, 2, 1, 1, 2, 1, 2, 1, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 2, 2, 13, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 2, 1, 3, 2, 2, 1, 2, 1, 3, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [2, 2, 2, 13, 2, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 2, 4, 5, 5, 5, 5, 5, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [5, 5, 6, 1, 2, 13, 2, 13, 13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 3, 13, 1, 1, 1, 1, 1, 1, 2, 7, 8, 8, 8, 8, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [8, 8, 8, 5, 6, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 13, 13, 2, 13, 13, 13, 13, 1, 13, 2, 13, 13, 1, 13, 13, 13, 2, 1, 2, 1, 1, 1, 3, 1, 10, 11, 11, 11, 11, 11, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [8, 8, 8, 8, 8, 6, 3, 2, 2, 2, 1, 2, 1, 1, 2, 3, 1, 1, 3, 2, 2, 1, 2, 3, 13, 1, 1, 1, 3, 1, 2, 13, 1, 13, 13, 2, 3, 1, 2, 3, 2, 1, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 2, 1, 2, 3, 1, 1, 1, 1, 1, 1, 7, 8, 8, 12, 3, 1, 2, 2, 1, 2, 3, 1, 1, 1, 1, 1, 1, 2, 7, 8, 8, 1, 1, 1, 1, 2, 3, 2, 1, 3, 1, 2, 2, 1, 2, 1, 2, 1],
+    [1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 10, 12, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 10, 12, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 2, 1],
+    [1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 13, 1, 2, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1, 1, 2, 1, 1],
+    [1, 1, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 2, 1, 3, 1, 2, 13, 13, 13, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 13, 1, 2, 1, 13, 13, 1, 1, 1, 13, 13, 1, 3, 2, 13, 13, 1, 13, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 3],
+    [2, 1, 1, 2, 2, 1, 1, 1, 1, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 13, 2, 1, 13, 2, 1, 1, 1, 1, 2, 3, 13, 1, 13, 13, 2, 13, 13, 13, 13, 3, 1, 1, 1, 1, 1, 3, 1, 2, 1, 2, 1],
+    [2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 3, 1, 13, 2, 1, 2, 3, 13, 13, 2, 3, 1, 1, 1, 1, 1, 2, 2, 13, 2, 1, 1, 2, 1, 2, 1, 13, 13, 13, 13, 13, 1, 2, 1, 2, 1, 3, 2],
+    [2, 2, 2, 13, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 2, 1, 3, 2, 2, 1, 2, 1, 3, 2, 1, 3, 1, 13, 13, 2, 1, 2, 1, 2],
+    [2, 2, 2, 13, 2, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 2, 4, 5, 5, 5, 5, 5, 6, 13, 2, 3, 2, 1],
+    [5, 5, 6, 1, 2, 13, 2, 13, 13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 3, 13, 1, 1, 1, 1, 1, 1, 2, 7, 8, 8, 8, 8, 8, 9, 1, 2, 1, 2, 3],
+    [8, 8, 8, 5, 6, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 13, 13, 2, 13, 13, 13, 13, 1, 13, 2, 13, 13, 1, 13, 13, 13, 2, 1, 2, 1, 1, 1, 3, 1, 10, 11, 11, 11, 11, 11, 12, 1, 2, 2, 1, 2],
+    [8, 8, 8, 8, 8, 6, 3, 2, 2, 2, 1, 2, 1, 1, 2, 3, 1, 1, 3, 2, 2, 1, 2, 3, 13, 1, 1, 1, 3, 1, 2, 13, 1, 13, 13, 2, 3, 1, 2, 3, 2, 1, 3, 2, 2, 1, 2, 3, 2, 1, 2]
   ];
 
   return tiles;
@@ -102,6 +102,35 @@ export type SceneryData = {
 };
 
 export const scenery: SceneryData[] = [
+  { id: "tree-left-1", x: 50 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-2", x: 49 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-3", x: 48 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-4", x: 47 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeYellowGroup7" },
+
+  { id: "tree-left-5", x: 50 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-6", x: 49 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-7", x: 48 * TILE_SIZE, y: 1 * TILE_SIZE, kind: "treeYellowGroup7" },
+
+  { id: "tree-left-8", x: 50 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-9", x: 49 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "treeYellowGroup7" },
+
+  { id: "tree-left-10", x: 50 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-11", x: 49 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "treeYellowGroup4" },
+
+  { id: "tree-left-12", x: 50 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "treeYellowGroup5" },
+  { id: "tree-left-13", x: 49 * TILE_SIZE, y: 4 * TILE_SIZE, kind: "treeYellowGroup4" },
+
+  { id: "tree-left-14", x: 50 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "treeYellowGroup8" },
+
+  { id: "tree-tall-1-top", x: 49 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenTall2" },
+  { id: "tree-tall-1-bot", x: 49 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "treeGreenTall1" },
+
+  { id: "fence-7", x: 50 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "fenceV1" },
+  { id: "fence-7", x: 50 * TILE_SIZE, y: 6 * TILE_SIZE, kind: "fenceV2" },
+  { id: "fence-7", x: 50 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "fenceV2" },
+  { id: "fence-7", x: 50 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "treeGreenSmall" },
+
+  //
   { id: "tree-left-1", x: 0 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup5" },
   { id: "tree-left-2", x: 1 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup5" },
   { id: "tree-left-3", x: 2 * TILE_SIZE, y: 0 * TILE_SIZE, kind: "treeGreenGroup5" },
@@ -259,6 +288,10 @@ export const scenery: SceneryData[] = [
   { id: "light-2-rt", x: 23.64 * TILE_SIZE, y: 8 * TILE_SIZE, kind: "twoLightPoleRT" },
   { id: "light-2-b", x: 23 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "twoLightPoleB" },
 
+  { id: "light-2-lt", x: 30.64 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "twoLightPoleLT" },
+  { id: "light-2-rt", x: 31.64 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "twoLightPoleRT" },
+  { id: "light-2-b", x: 31 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "twoLightPoleB" },
+
   // 세탁대(연속 5조각)
   { id: "drying-1-1", x: 7 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
   { id: "drying-1-2", x: 8 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole2" },
@@ -266,11 +299,19 @@ export const scenery: SceneryData[] = [
   { id: "drying-1-4", x: 10 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole4" },
   { id: "drying-1-5", x: 10.1 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
 
+  { id: "drying-1-1", x: 46 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
+  { id: "drying-1-2", x: 47 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole2" },
+  { id: "drying-1-3", x: 48 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole3" },
+  { id: "drying-1-4", x: 49 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole4" },
+  { id: "drying-1-5", x: 49.1 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "dryingPole1" },
+
   // 쓰레기통
   { id: "trashcan-1", x: 16 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "trashCan2" },
   { id: "trashcan-2", x: 28.7 * TILE_SIZE, y: 9 * TILE_SIZE, kind: "trashCan2" },
+  { id: "trashcan-1", x: 50 * TILE_SIZE, y: 10 * TILE_SIZE, kind: "trashCan2" },
 
   // 벤치
+  { id: "bench-1", x: 24 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "bench" },
   { id: "bench-1", x: 24 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "bench" },
 
   // F) CITY: 보드(게시판) + 포스트잇 올라가는 영역
@@ -317,6 +358,4 @@ export const scenery: SceneryData[] = [
   { id: "bank-sign-r", x: 36 * TILE_SIZE, y: 2 * TILE_SIZE, kind: "signBlueR" },
   { id: "bank-atm-1", x: 33 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "atm" },
   { id: "bank-atm-2", x: 34 * TILE_SIZE, y: 3 * TILE_SIZE, kind: "atm" },
-
-  
 ];

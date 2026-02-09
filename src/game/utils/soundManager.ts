@@ -1,4 +1,6 @@
 import { sound } from "@pixi/sound";
+import { getDefaultStore } from "jotai";
+import { soundEnabledAtom } from "../state/gameAtoms";
 
 import coinSound from "../../assets/sounds/coin.mp3";
 import walkondirt1 from "../../assets/sounds/walkondirt1.mp3";
@@ -42,6 +44,16 @@ const randRate = () => 0.95 + Math.random() * 0.1;
 
 const safePlay = (alias: string, opts?: Parameters<typeof sound.play>[1]) => {
   if (!_inited) return;
+
+  const store = getDefaultStore();
+  const isSoundEnabled = store.get(soundEnabledAtom);
+
+  if (!isSoundEnabled) {
+    sound.muteAll();
+  } else {
+    sound.unmuteAll();
+  }
+
   try {
     sound.play(alias, opts as any);
   } catch {

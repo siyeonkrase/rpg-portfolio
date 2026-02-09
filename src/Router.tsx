@@ -1,6 +1,11 @@
 import { Routes, Route, HashRouter, Link } from "react-router-dom";
 import GamePage from "./routes/GamePage";
 import styled, { keyframes } from "styled-components";
+import { GAME_ASSETS } from "./game/data/gameAssets";
+import { useAtom } from "jotai";
+import { soundEnabledAtom } from "./game/state/gameAtoms";
+import { sound } from "@pixi/sound";
+import { useEffect } from "react";
 
 const pulse = keyframes`
   0% { transform: scale(1); box-shadow: 0 0 0px rgba(255,255,255,0.2); }
@@ -59,7 +64,7 @@ const Body = styled.div`
     display: flex;
     align-items: center;
     &:before {
-      content: "▶"; /* 리스트 기호를 게임 아이콘처럼 */
+      content: "▶";
       font-size: 12px;
       margin-right: 10px;
       color: #3f5efb;
@@ -93,9 +98,54 @@ const Footer = styled.div`
   font-family: "monospace";
 `;
 
+const SoundToggle = styled.div`
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 11000;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  backdrop-filter: blur(5px);
+
+  img {
+    width: 32px;
+    height: 32px;
+    mix-blend-mode: screen;
+    image-rendering: pixelated;
+  }
+
+  &:hover {
+    /* background: #3f5efb; */
+    border-color: #fff;
+    transform: scale(1.1);
+  }
+`;
+
 export default function Router() {
+  const [soundEnabled, setSoundEnabled] = useAtom(soundEnabledAtom);
+  
+  useEffect(() => {
+    if (soundEnabled) {
+      sound.unmuteAll();
+    } else {
+      // 소리를 끌 때 현재 재생 중인 소리도 즉시 멈추고 뮤트 처리
+      sound.stopAll(); 
+      sound.muteAll();
+    }
+  }, [soundEnabled]);
+  
   return (
     <HashRouter>
+      <SoundToggle onClick={() => setSoundEnabled(!soundEnabled)}>
+        <img 
+          src={soundEnabled ? GAME_ASSETS.SpeakerOn : GAME_ASSETS.SpeakerOff} 
+          alt="Sound Toggle" 
+        />
+      </SoundToggle>
       <Routes>
         <Route
           path="/"

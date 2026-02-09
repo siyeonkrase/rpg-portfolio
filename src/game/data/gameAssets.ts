@@ -21,6 +21,9 @@ import cryptoShot from "../../assets/screenshots/crypto.png";
 
 import villagerManPng from "../../assets/MiniVillagerMan.png";
 
+import SpeakerOn from "../../assets/Speaker-0.png";
+import SpeakerOff from "../../assets/Speaker-Crossed.png";
+
 export const GAME_ASSETS = {
   churchBuilding,
   cinemaSign,
@@ -41,6 +44,8 @@ export const GAME_ASSETS = {
   chromeShot,
   cryptoShot,
   villagerManPng,
+  SpeakerOn,
+  SpeakerOff
 } as const;
 
 export const GAME_ASSET_URLS = Object.values(GAME_ASSETS);

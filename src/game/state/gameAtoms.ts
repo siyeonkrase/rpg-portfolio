@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import type { MapId, PlayerState } from "../data/types";
 
 export const currentMapIdAtom = atom<MapId>("town");
@@ -60,3 +61,5 @@ export const markIntroSeenAtom = atom(null, (_get, set) => {
     // ignore
   }
 });
+
+export const soundEnabledAtom = atomWithStorage("sound_enabled", false);
