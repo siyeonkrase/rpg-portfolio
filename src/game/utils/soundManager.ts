@@ -10,6 +10,8 @@ import walkongrass1 from "../../assets/sounds/walkongrass1.mp3";
 import walkongrass2 from "../../assets/sounds/walkongrass2.mp3";
 import walkongrass3 from "../../assets/sounds/walkongrass3.mp3";
 import walkonpath from "../../assets/sounds/walkonpath.mp3";
+import itemspinning from "../../assets/sounds/itemspinning.mp3";
+import master from "../../assets/sounds/master.mp3";
 
 const DIRT_CODES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
 const PATH_CODES = [13];
@@ -38,6 +40,9 @@ export const initSounds = () => {
   if (!sound.exists("grass3")) sound.add("grass3", walkongrass3);
 
   if (!sound.exists("path")) sound.add("path", walkonpath);
+
+  if (!sound.exists("master_spin")) sound.add("master_spin", itemspinning);
+  if (!sound.exists("master_impact")) sound.add("master_impact", master);
 };
 
 const randRate = () => 0.95 + Math.random() * 0.1;
@@ -102,4 +107,24 @@ export const playStepByCoords = (
 
   const i = 1 + Math.floor(Math.random() * 3);
   safePlay(`grass${i}`, { volume: 0.15, speed } as any);
+};
+
+export const playMasterSpin = () => {
+  safePlay("master_spin", {
+    volume: 0.6,
+    loop: true
+  } as any);
+};
+
+export const stopMasterSpin = () => {
+  if (sound.exists("master_spin")) {
+    sound.stop("master_spin");
+  }
+};
+
+export const playMasterImpact = () => {
+  safePlay("master_impact", {
+    volume: 0.8,
+    speed: 1.0,
+  } as any);
 };

@@ -4,7 +4,8 @@ export const playItemAcquiredEffect = (
   container: PIXI.Container,
   x: number,
   y: number,
-  itemTexture: PIXI.Texture
+  itemTexture: PIXI.Texture,
+  onComplete? : () => void
 ) => {
   const itemSprite = new PIXI.Sprite(itemTexture);
 
@@ -46,6 +47,8 @@ export const playItemAcquiredEffect = (
     if (elapsed >= duration) {
       container.removeChild(itemSprite as any);
       PIXI.Ticker.shared.remove(animate);
+
+      if (onComplete) onComplete();
     }
   };
 

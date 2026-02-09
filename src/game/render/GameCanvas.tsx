@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 import { useAtom, useAtomValue } from "jotai";
-import { currentMapIdAtom, playerAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom } from "../state/gameAtoms";
+import { currentMapIdAtom, playerAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom, dialogueAtom, uiModeAtom, soundEnabledAtom } from "../state/gameAtoms";
 import { maps, scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE, LOGICAL_W, LOGICAL_H } from "../data/config";
 import { tiles } from "../render/tilesets/tileset";
@@ -11,16 +11,18 @@ import { drawLandmarksAndHouses, attachBillboardTicker, type BillboardInfo, LAND
 import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../pixi/depthSort";
 import { drawStickyNotesOnBoard } from "../render/draw/drawStickyNotes";
 import { PlayerSprite } from "../pixi/player/PlayerSprite";
-import villagerManPng from "../../assets/MiniVillagerMan.png";
 import { makeVillagerAnim } from "../pixi/player/playerAnims";
 import { playItemAcquiredEffect } from "./draw/ItemEffect";
 import { PROJECT_INVENTORY_ICONS } from "../data/projectInventory";
-import { GAME_ASSET_URLS, preloadImages } from "../data/gameAssets";
+import { GAME_ASSET_URLS, GAME_ASSETS, preloadImages } from "../data/gameAssets";
 import type { AABB } from "../engine/aabb";
 import { aabbIntersects } from "../engine/aabb";
 import { createHighlight, tickHighlights, type HighlightHandle } from "../render/draw/drawHighlight";
 import { aabbFromDoorTiles } from "../engine/door";
 import type { DoorTile } from "../engine/door";
+import { SLOTS } from "../../components/ui/HUD";
+import { playMasterSequence } from "./draw/drawMasterEffect";
+import bgm_town from "../../assets/sounds/bgm_town.mp3"
 
 const WORLD_OFFSET_Y = 0;
 
@@ -190,8 +192,12 @@ export function GameCanvas() {
   const [hint, setHint] = useAtom(interactHintAtom);
   const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
   const [, setActiveAction] = useAtom(activeInteractableActionAtom);
+  const [, setDialogue] = useAtom(dialogueAtom);
+  const [uiMode, setUiMode] = useAtom(uiModeAtom);
 
   const inventory = useAtomValue(inventoryAtom);
+  const isSoundEnabled = useAtomValue(soundEnabledAtom);
+
   const lastCountRef = useRef(inventory.size);
   const inventoryRef = useRef<Set<string>>(new Set());
 
@@ -212,6 +218,8 @@ export function GameCanvas() {
   const highlightsRef = useRef<HighlightHandle[]>([]);
   const boardFaceRef = useRef<Record<string, AABB>>({});
 
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+
   const currentMapId = useAtomValue(currentMapIdAtom);
   const player = useAtomValue(playerAtom);
   const cameraX = useAtomValue(cameraXAtom);
@@ -219,6 +227,7 @@ export function GameCanvas() {
   const map = maps[currentMapId];
 
   const interactablesRef = useRef<Interactable[]>([]);
+  const prevUiMode = useRef<string>(uiMode);
 
   useEffect(() => {
     let cancelled = false;
@@ -252,6 +261,8 @@ export function GameCanvas() {
       resolution: window.devicePixelRatio || 1,
     });
 
+    (window as any).pixiApp = app;
+
     const root = new PIXI.Container();
     const cameraLayer = new PIXI.Container();
     root.addChild(cameraLayer as any);
@@ -272,7 +283,7 @@ export function GameCanvas() {
     cameraLayer.addChild(layers.overlay as any);
     cameraLayer.sortChildren();
 
-    const tex = PIXI.Texture.from(villagerManPng);
+    const tex = PIXI.Texture.from(GAME_ASSETS.villagerManPng);
     const playerSprite = new PlayerSprite({
       texture: tex,
       tileSize: TILE_SIZE,
@@ -301,6 +312,9 @@ export function GameCanvas() {
 
     playerSpriteRef.current = playerSprite;
     prevPosRef.current = { x: player.x, y: player.y };
+
+    (window as any).playerContainer = playerSprite.sprite;
+    (window as any).pixiApp = app;
 
     layers.player.addChild(playerSprite.sprite as any);
 
@@ -335,6 +349,10 @@ export function GameCanvas() {
 
     return () => {
       window.removeEventListener("resize", doResize);
+
+      delete (window as any).pixiApp;
+      delete (window as any).playerContainer;
+
       app.destroy(true);
 
       appRef.current = null;
@@ -821,27 +839,51 @@ export function GameCanvas() {
 
 
   useEffect(() => {
-    if (inventory.size > lastCountRef.current) {
-      const sprite = playerSpriteRef.current;
-      const layers = layersRef.current;
+  if (inventory.size > lastCountRef.current) {
+    const sprite = playerSpriteRef.current;
+    const layers = layersRef.current;
+    const app = appRef.current;
 
-      if (sprite && layers) {
-        const inventoryArray = Array.from(inventory);
-        const lastItemId = inventoryArray[inventoryArray.length - 1];
+    if (sprite && layers && app) {
+      const inventoryArray = Array.from(inventory);
+      const lastItemId = inventoryArray[inventoryArray.length - 1];
+      const texture = PIXI.Texture.from(PROJECT_INVENTORY_ICONS[lastItemId] || PROJECT_INVENTORY_ICONS[0]);
 
-        const texture = PIXI.Texture.from(PROJECT_INVENTORY_ICONS[lastItemId] || PROJECT_INVENTORY_ICONS[0]);
+      playItemAcquiredEffect(
+        layers.player, 
+        sprite.sprite.x, 
+        sprite.sprite.y, 
+        texture,
+        () => {
+          const isMaster = inventory.size >= 5;
+          
+          if (isMaster) {
+            const iconPaths = SLOTS.map(id => PROJECT_INVENTORY_ICONS[id]);
+            
+            playMasterSequence(app, sprite.sprite, iconPaths, () => {
+              setTimeout(() => {
+                setDialogue({
+                  npcId: "player",
+                  index: 0,
+                  lines: [
+                    "......!",
+                    "Wait, what was that? My bag is... shaking?",
+                    "Everything I've collected... it's all starting to glow together!",
+                    "Perhaps I should check my bag!",
+                  ]
+                });
 
-        playItemAcquiredEffect(
-          layers.player, 
-          sprite.sprite.x, 
-          sprite.sprite.y, 
-          texture
-        );
-      }
+                setUiMode("dialogue");
+              }, 800);
+            });
+          }
+        }
+      );
     }
-    lastCountRef.current = inventory.size;
-    inventoryRef.current = inventory;
-  }, [inventory]);
+  }
+  lastCountRef.current = inventory.size;
+  inventoryRef.current = inventory;
+}, [inventory, setDialogue]);
 
   useEffect(() => {
     return () => {
@@ -850,11 +892,76 @@ export function GameCanvas() {
     };
   }, []);
 
+  useEffect(() => {
+    if (prevUiMode.current === "dialogue" && uiMode === "game") {
+      if (inventory.size >= 5) {
+        setTimeout(() => {
+          const slots = document.querySelectorAll('.hud-slot');
+          console.log("Found slots after dialogue:", slots.length); 
+
+          if (slots.length > 0) {
+            slots.forEach((slot, index) => {
+              setTimeout(() => {
+                slot.classList.add('inventory-pulse');
+
+                setTimeout(() => {
+                  slot.classList.remove('inventory-pulse');
+                }, 2000);
+              }, index * 100);
+            });
+          }
+        }, 300)
+
+      }
+    }
+    prevUiMode.current = uiMode;
+  }, [uiMode, inventory.size]);
+
+  useEffect(() => {
+    const audio = new Audio(bgm_town); 
+    audio.loop = true;
+    bgmRef.current = audio;
+
+    audio.volume = isSoundEnabled ? 0.4 : 0;
+
+    const startBgm = () => {
+      audio.play()
+        .then(() => {
+          console.log("BGM 재생 성공!");
+          cleanupListeners();
+        })
+        .catch(err => console.log("BGM 자동 재생 차단됨, 대기 중..."));
+    };
+
+    const cleanupListeners = () => {
+      window.removeEventListener("click", startBgm);
+      window.removeEventListener("keydown", startBgm);
+    };
+
+    window.addEventListener("click", startBgm);
+    window.addEventListener("keydown", startBgm);
+
+    startBgm();
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+      cleanupListeners();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (bgmRef.current) {
+      bgmRef.current.volume = isSoundEnabled ? 0.4 : 0;
+    }
+  }, [isSoundEnabled]);
+
   return (
     <div style={{ position: "fixed", inset: 0 }}>
       <canvas
         id="game-canvas"
         ref={canvasRef}
+        tabIndex={0}
         style={{
           position: "fixed",
           inset: 0,

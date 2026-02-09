@@ -6,6 +6,7 @@ export const currentMapIdAtom = atom<MapId>("town");
 export const uiModeAtom = atom<"game" | "dialogue" | "project">("game");
 export const seenProjectsAtom = atom<Record<string, boolean>>({});
 export const inventoryAtom = atom<Set<string>>(new Set<string>());
+export const isMasterModeAtom = atom((get) => get(inventoryAtom).size >= 5);
 
 export type PlayerEffect = { text: "SUCCESS!"; at: number } | null;
 export const playerEffectAtom = atom<PlayerEffect>(null);

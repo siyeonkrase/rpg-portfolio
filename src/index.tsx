@@ -107,6 +107,26 @@ h1{
   font-family: 'KenneyMiniSquare', sans-serif;
   letter-spacing: 0.04em;
 }
+@keyframes inventory-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); filter: brightness(1.5) saturate(1.2); }
+  100% { transform: scale(1); }
+}
+div.inventory-pulse, 
+.hud-slot.inventory-pulse,
+.inventory-slot.inventory-pulse {
+  transform-origin: center !important;
+  display: flex !important;
+  animation: inventory-pulse 0.8s ease-in-out 2 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  pointer-events: none;
+}
+.inventory-pulse .inventory-icon {
+  margin: auto !important;
+  transform-origin: center !important;
+}
 `;
 
 const root = ReactDOM.createRoot(

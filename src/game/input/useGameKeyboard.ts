@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import type { AABB } from "../engine/aabb";
-import { playerAtom, cameraXAtom, currentMapIdAtom, uiModeAtom, activeProjectAtom, activeInteractableActionAtom } from "../state/gameAtoms";
+import { playerAtom, cameraXAtom, currentMapIdAtom, uiModeAtom, activeProjectAtom, activeInteractableActionAtom, inventoryAtom } from "../state/gameAtoms";
 import { closeProjectAtom } from "../state/inventoryAtoms";
 import { TILE_SIZE, VIEWPORT_WIDTH_TILES, VIEWPORT_HEIGHT_TILES, MOVE_SPEED } from "../data/config";
 import { maps } from "../data/maps";
 import type { PlayerState } from "../data/types";
 import { playStepByCoords } from "../utils/soundManager";
+import { SLOTS } from "../../components/ui/HUD"
 
 const VIEWPORT_WIDTH_PX = VIEWPORT_WIDTH_TILES * TILE_SIZE;
 const VIEWPORT_HEIGHT_PX = VIEWPORT_HEIGHT_TILES * TILE_SIZE;
@@ -31,6 +32,8 @@ export function useGameKeyboard() {
   const activeProject = useAtomValue(activeProjectAtom);
   const setActiveProject = useSetAtom(activeProjectAtom);
   const closeProject = useSetAtom(closeProjectAtom);
+
+  const setInventory = useSetAtom(inventoryAtom);
 
   const stepTimerRef = useRef<number>(0);
   const STEP_INTERVAL = 0.35;
@@ -68,31 +71,36 @@ export function useGameKeyboard() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (uiMode !== "game") {
-      pressedRef.current = { left: false, right: false, up: false, down: false };
-      setPlayer((p) => ({ ...p, moving: false }));
-      frameId = requestAnimationFrame(loop);
-      return;
-    }
+      if (e.key === "F2" || e.key === "m") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("💎 GLOBAL CHEAT ACTIVATED!");
+        setInventory(new Set(SLOTS));
+        return;
+      }
 
       const k = e.key;
 
       const isMoveKey =
-        k === "ArrowLeft" ||
-        k === "ArrowRight" ||
-        k === "ArrowUp" ||
-        k === "ArrowDown" ||
-        k === "w" || k === "W" ||
-        k === "a" || k === "A" ||
-        k === "s" || k === "S" ||
-        k === "d" || k === "D";
-
-      if (isMoveKey) e.preventDefault();
+      k === "ArrowLeft" ||
+      k === "ArrowRight" ||
+      k === "ArrowUp" ||
+      k === "ArrowDown" ||
+      k === "w" || k === "W" ||
+      k === "a" || k === "A" ||
+      k === "s" || k === "S" ||
+      k === "d" || k === "D";
 
       if (k === "ArrowLeft" || k === "a" || k === "A") pressedRef.current.left = true;
       if (k === "ArrowRight" || k === "d" || k === "D") pressedRef.current.right = true;
       if (k === "ArrowUp" || k === "w" || k === "W") pressedRef.current.up = true;
       if (k === "ArrowDown" || k === "s" || k === "S") pressedRef.current.down = true;
+
+      if (uiMode !== "game") {
+        return;
+      }
+
+      if (isMoveKey) e.preventDefault();
     }
 
     function handleKeyUp(e: KeyboardEvent) {
@@ -130,20 +138,6 @@ export function useGameKeyboard() {
 
       const isMoving = dx !== 0 || dy !== 0;
 
-      if (isMoving) {
-        stepTimerRef.current += dt;
-        if (stepTimerRef.current >= STEP_INTERVAL) {
-          const currentMapData = maps["town"].tiles;
-          setPlayer((p) => {
-            playStepByCoords(p.x, p.y, currentMapData, TILE_SIZE);
-            return p;
-          });
-          stepTimerRef.current = 0;
-        }
-      } else {
-        stepTimerRef.current = STEP_INTERVAL;
-      }
-
       if (dx !== 0 && dy !== 0) {
         const inv = 1 / Math.sqrt(2);
         dx *= inv;
@@ -156,6 +150,13 @@ export function useGameKeyboard() {
         let nextDir = prev.dir;
 
         if (isMoving) {
+
+          stepTimerRef.current += dt;
+          if (stepTimerRef.current >= STEP_INTERVAL) {
+            playStepByCoords(prev.x, prev.y, maps["town"].tiles, TILE_SIZE);
+            stepTimerRef.current = 0;
+          }
+
           nextX = prev.x + dx * MOVE_SPEED * dt;
           nextY = prev.y + dy * MOVE_SPEED * dt;
 
@@ -176,6 +177,7 @@ export function useGameKeyboard() {
           }
         } else {
           nextDir = "down";
+          stepTimerRef.current = STEP_INTERVAL;
         }
 
         const map = maps["town"];
@@ -206,5 +208,12 @@ export function useGameKeyboard() {
       cancelAnimationFrame(frameId);
       lastTimeRef.current = null;
     };
-  }, [setPlayer, setCameraX, currentMapId, uiMode]);
+  }, [setPlayer, setCameraX, currentMapId, uiMode, setInventory]);
+
+  useEffect(() => {
+    if (uiMode !== "game") {
+      pressedRef.current = { left: false, right: false, up: false, down: false };
+      return;
+    }
+  }, [uiMode]);
 }

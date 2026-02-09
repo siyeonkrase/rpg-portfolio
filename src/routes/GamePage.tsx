@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js";
+
 import { useEffect, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 
@@ -34,37 +36,39 @@ export default function GamePage() {
 
     (async () => {
       try {
-        const urls = [
-        GAME_ASSETS.movieModalPng,
-        GAME_ASSETS.comModalPng,
-        GAME_ASSETS.cryptoModalPng,
-        GAME_ASSETS.weddingModalPng,
-        GAME_ASSETS.kanbanModalPng,
-        GAME_ASSETS.weddingShot,
-        GAME_ASSETS.movieShot,
-        GAME_ASSETS.bentoShot,
-        GAME_ASSETS.chromeShot,
-        GAME_ASSETS.cryptoShot,
-        ];
-
-        await preloadImages(urls);
+        const allAssets = Object.values(GAME_ASSETS);
+        await preloadImages(allAssets);
+        await Promise.all(
+          allAssets.map(url => PIXI.Assets.load(url))
+        );
+        await new Promise((res) => requestAnimationFrame(() => setTimeout(res, 500)));
 
         if (!cancelled) setIsLoading(false);
-      } catch {
+      } catch (e) {
+        console.error("Asset loading failed", e);
         if (!cancelled) setIsLoading(false);
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     if (!isLoading) initSounds();
   }, [isLoading]);
 
+  useEffect(() => {
+    if (uiMode === "game") {
+      const canvas = document.querySelector('canvas');
+      if (canvas) {
+        canvas.focus();
+      }
+    }
+  }, [uiMode]);
+
   useGameKeyboard();
+
+  if (isLoading) return <Loading />;
 
   return (
     <div
@@ -100,7 +104,6 @@ export default function GamePage() {
         <Manual />
         {uiMode === "dialogue" && <DialogueBox />}
         {uiMode === "project" && <ProjectModal />}
-        {isLoading && <Loading />}
       </div>
     </div>
   );

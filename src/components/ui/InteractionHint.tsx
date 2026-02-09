@@ -5,12 +5,12 @@ import styled from "styled-components";
 const HintContainer = styled.div`
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: 50px;
   transform: translateX(-50%);
   /* ✅ 핵심: 모달(9999)보다 높은 수치를 주어 블러 위로 올림 */
   z-index: 10050; 
   font-family: "KenneyMiniSquare", sans-serif;
-  font-size: 14px;
+  font-size: 30px;
   color: #fff;
   background: rgba(20, 24, 30, 0.85);
   border: 2px solid rgba(255, 255, 255, 0.25);
