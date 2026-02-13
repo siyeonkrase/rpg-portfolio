@@ -1,8 +1,8 @@
-import weddingIcon from "../../assets/inventory/ring.png";
-import movieIcon from "../../assets/inventory/movie.png";
-import chromeIcon from "../../assets/inventory/com.png";
-import cryptoIcon from "../../assets/inventory/coin.png";
-import bentoIcon from "../../assets/inventory/note.png";
+import weddingIcon from "../../assets/image/inventory/ring.png";
+import movieIcon from "../../assets/image/inventory/movie.png";
+import chromeIcon from "../../assets/image/inventory/com.png";
+import cryptoIcon from "../../assets/image/inventory/coin.png";
+import bentoIcon from "../../assets/image/inventory/note.png";
 
 export const PROJECT_INVENTORY_ICONS: Record<string, string> = {
   wedding: weddingIcon,

@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import type { AABB } from "../../engine/aabb";
 import { padAABB } from "../../engine/aabb";
-import { setDepth } from "../../pixi/depthSort";
+import { setDepth } from "../../engine/depth";
 
 export type HighlightHandle = {
   projectId: string;
@@ -29,7 +29,7 @@ export function createHighlight(
   const g = new PIXI.Graphics();
   const pad = opts?.pad ?? 0;
 
-  setDepth(g as any, (opts?.depthKey ?? "decor") as any, { useBottom: false });
+  setDepth(g as any, (opts?.depthKey ?? "buildingDetail") as any);
   container.addChild(g as any);
 
   const handle: HighlightHandle = {

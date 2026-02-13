@@ -9,14 +9,14 @@ import { ProjectModal } from "../components/ui/ProjectModal";
 import { HUD } from "../components/ui/HUD";
 import { useGameKeyboard } from "../game/input/useGameKeyboard";
 
-import { seenProjectsAtom, uiModeAtom } from "../game/state/gameAtoms";
-import { resetInventoryAtom } from "../game/state/inventoryAtoms";
+import { seenProjectsAtom, uiModeAtom } from "../game/state/stateAtoms";
+import { resetInventoryAtom } from "../game/state/actionAtoms";
 import { initSounds } from "../game/utils/soundManager";
 import { InteractionHint } from "../components/ui/InteractionHint";
 
 import { LOGICAL_W, LOGICAL_H } from "../game/data/config";
 import { preloadImages, GAME_ASSETS } from "../game/data/gameAssets";
-import { Manual } from "../components/ui/Manual";
+import { Help } from "../components/ui/Help";
 import { Loading } from "../components/ui/Loading";
 
 export default function GamePage() {
@@ -101,7 +101,7 @@ export default function GamePage() {
         <GameCanvas />
         <HUD />
         <InteractionHint />
-        <Manual />
+        <Help />
         {uiMode === "dialogue" && <DialogueBox />}
         {uiMode === "project" && <ProjectModal />}
       </div>

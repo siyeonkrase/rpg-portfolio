@@ -1,5 +1,6 @@
+// game.actions.ts
 import { atom } from "jotai";
-import { activeProjectAtom, inventoryAtom, seenProjectsAtom, uiModeAtom } from "./gameAtoms";
+import { activeProjectAtom, inventoryAtom, seenProjectsAtom, uiModeAtom } from "./stateAtoms";
 
 export const addInventoryAtom = atom(null, (get, set, projectId: string) => {
   const prev = get(inventoryAtom);
@@ -11,7 +12,7 @@ export const addInventoryAtom = atom(null, (get, set, projectId: string) => {
 });
 
 export const resetInventoryAtom = atom(null, (_get, set) => {
-  set(inventoryAtom, new Set<string>());
+  set(inventoryAtom, new Set());
 });
 
 export const closeProjectAtom = atom(null, (get, set) => {

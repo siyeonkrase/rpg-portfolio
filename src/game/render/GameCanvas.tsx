@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 import { useAtom, useAtomValue } from "jotai";
-import { currentMapIdAtom, playerAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom, dialogueAtom, uiModeAtom, soundEnabledAtom } from "../state/gameAtoms";
+import { currentMapIdAtom, charactersAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom, dialogueAtom, uiModeAtom, soundEnabledAtom } from "../state/stateAtoms";
 import { maps, scenery, landmarks, houses } from "../data/maps";
-import { TILE_SIZE, LOGICAL_W, LOGICAL_H } from "../data/config";
+import { TILE_SIZE, LOGICAL_W, LOGICAL_H, MAX_INVENTORY } from "../data/config";
 import { tiles } from "../render/tilesets/tileset";
 import { townTiles } from "../render/tilesets/townTileset";
 import { cityTiles } from "../render/tilesets/cityTileset";
 import { drawLandmarksAndHouses, attachBillboardTicker, type BillboardInfo, LANDMARK_DEFS, addChurchSprite, DOOR_TILE_IDS_BY_LANDMARK_ID } from "../render/draw/drawLandmarks";
-import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../pixi/depthSort";
+import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../engine/depth";
 import { drawStickyNotesOnBoard } from "../render/draw/drawStickyNotes";
-import { PlayerSprite } from "../pixi/player/PlayerSprite";
-import { makeVillagerAnim } from "../pixi/player/playerAnims";
-import { playItemAcquiredEffect } from "./draw/ItemEffect";
+import { CharacterSprite } from "../character/characterSprite";
+import { makeVillagerAnim } from "../character/characterAnims";
+import { playItemAcquiredEffect } from "./draw/drawItemEffect";
 import { PROJECT_INVENTORY_ICONS } from "../data/projectInventory";
 import { GAME_ASSET_URLS, GAME_ASSETS, preloadImages } from "../data/gameAssets";
 import type { AABB } from "../engine/aabb";
@@ -23,6 +23,8 @@ import type { DoorTile } from "../engine/door";
 import { SLOTS } from "../../components/ui/HUD";
 import { playMasterSequence } from "./draw/drawMasterEffect";
 import bgm_town from "../../assets/sounds/bgm_town.mp3"
+import { BGM_VOLUME } from "../utils/soundManager";
+import { CollisionWorld } from "../engine/collisionWorld";
 
 const WORLD_OFFSET_Y = 0;
 
@@ -51,9 +53,9 @@ function isBuildingDetailKind(kind: string) {
 
 type Layers = {
   ground: PIXI.Container;
-  actors: PIXI.Container;
+  world: PIXI.Container;
   buildingDetail: PIXI.Container;
-  player: PIXI.Container;
+  characters: PIXI.Container;
   overlay: PIXI.Container;
 };
 
@@ -64,33 +66,19 @@ type Interactable = {
   action: { type: "project"; projectId: string } | { type: "dialogue"; lines: string[] };
 };
 
-class CollisionWorld {
-  solids: AABB[] = [];
-  clear() {
-    this.solids = [];
-  }
-  add(box: AABB) {
-    this.solids.push(box);
-  }
-  hitsAny(box: AABB) {
-    for (const s of this.solids) if (aabbIntersects(box, s)) return true;
-    return false;
-  }
-}
-
 function createLayers(): Layers {
   const ground = new PIXI.Container();
-  const actors = new PIXI.Container();
+  const world = new PIXI.Container();
   const buildingDetail = new PIXI.Container();
-  const player = new PIXI.Container();
+  const characters = new PIXI.Container();
   const overlay = new PIXI.Container();
 
-  actors.sortableChildren = true;
+  world.sortableChildren = true;
   buildingDetail.sortableChildren = true;
-  player.sortableChildren = true;
+  characters.sortableChildren = true;
   overlay.sortableChildren = true;
 
-  return { ground, actors, buildingDetail, player, overlay };
+  return { ground, world, buildingDetail, characters, overlay };
 }
 
 function isSolidKind(kind: string) {
@@ -209,7 +197,7 @@ export function GameCanvas() {
 
   const layersRef = useRef<Layers | null>(null);
 
-  const playerSpriteRef = useRef<PlayerSprite | null>(null);
+  const characterSpriteRef = useRef<CharacterSprite | null>(null);
   const prevPosRef = useRef<{ x: number; y: number } | null>(null);
 
   const billboardsRef = useRef<BillboardInfo[]>([]);
@@ -221,7 +209,7 @@ export function GameCanvas() {
   const bgmRef = useRef<HTMLAudioElement | null>(null);
 
   const currentMapId = useAtomValue(currentMapIdAtom);
-  const player = useAtomValue(playerAtom);
+  const characters = useAtomValue(charactersAtom);
   const cameraX = useAtomValue(cameraXAtom);
 
   const map = maps[currentMapId];
@@ -271,59 +259,53 @@ export function GameCanvas() {
     cameraLayer.sortableChildren = true;
 
     layers.ground.zIndex = 0;
-    layers.actors.zIndex = 10;
+    layers.world.zIndex = 10;
     layers.buildingDetail.zIndex = 20;
-    layers.player.zIndex = 30;
+    layers.characters.zIndex = 30;
     layers.overlay.zIndex = 40;
 
     cameraLayer.addChild(layers.ground as any);
-    cameraLayer.addChild(layers.actors as any);
+    cameraLayer.addChild(layers.world as any);
     cameraLayer.addChild(layers.buildingDetail as any);
-    cameraLayer.addChild(layers.player as any);
+    cameraLayer.addChild(layers.characters as any);
     cameraLayer.addChild(layers.overlay as any);
     cameraLayer.sortChildren();
 
     const tex = PIXI.Texture.from(GAME_ASSETS.villagerManPng);
-    const playerSprite = new PlayerSprite({
+    const characterSprite = new CharacterSprite({
       texture: tex,
       tileSize: TILE_SIZE,
       sizeTiles: 2.2,
       frameW: 32,
       frameH: 32,
-      rows: { down: 0, up: 0, right: 1, left: 1 },
-      idleRow: 0,
+      walkRow: 1,
       walkCols: [1, 2, 3, 4],
-      idleCol: 0,
     });
 
-    playerSprite.setAnimSet(
+    characterSprite.setAnimSet(
       makeVillagerAnim({
         frameW: 32,
         frameH: 32,
-        idleRow: 0,
-        sideRow: 1,
-        verticalRow: 1,
-        idleCol: 0,
+        row: 1,
         walkCols: [0, 1, 2, 3, 4, 5],
-        jumpCols: [0, 1, 2],
         speed: 0.18,
       })
     );
 
-    playerSpriteRef.current = playerSprite;
-    prevPosRef.current = { x: player.x, y: player.y };
+    characterSpriteRef.current = characterSprite;
+    prevPosRef.current = { x: characters.x, y: characters.y };
 
-    (window as any).playerContainer = playerSprite.sprite;
+    (window as any).charactersContainer = characterSprite.sprite;
     (window as any).pixiApp = app;
 
-    layers.player.addChild(playerSprite.sprite as any);
+    layers.characters.addChild(characterSprite.sprite as any);
 
     app.stage.addChild(root as any);
-    enableDepthSorting(cameraLayer, app.stage);
+    enableDepthSorting(cameraLayer);
 
     const cw = new CollisionWorld();
     collisionRef.current = cw;
-    (globalThis as any).__collisionWorld = cw;
+    (globalThis as any).collisionWorld = cw;
 
     appRef.current = app;
     rootRef.current = root;
@@ -351,7 +333,7 @@ export function GameCanvas() {
       window.removeEventListener("resize", doResize);
 
       delete (window as any).pixiApp;
-      delete (window as any).playerContainer;
+      delete (window as any).charactersContainer;
 
       app.destroy(true);
 
@@ -360,7 +342,7 @@ export function GameCanvas() {
       cameraLayerRef.current = null;
       layersRef.current = null;
       collisionRef.current = null;
-      playerSpriteRef.current = null;
+      characterSpriteRef.current = null;
       prevPosRef.current = null;
       delete (globalThis as any).__collisionWorld;
     };
@@ -378,7 +360,7 @@ export function GameCanvas() {
     setHint(null);
 
     layers.ground.removeChildren();
-    layers.actors.removeChildren();
+    layers.world.removeChildren();
     layers.buildingDetail.removeChildren();
     layers.overlay.removeChildren();
 
@@ -409,7 +391,7 @@ export function GameCanvas() {
     layers.ground.addChild(tileLayer as any);
 
     drawLandmarksAndHouses(
-      { building: layers.actors, object: layers.actors, overlay: layers.overlay } as any,
+      { building: layers.world, object: layers.world, overlay: layers.overlay } as any,
       currentMapId,
       billboardsRef.current
     );
@@ -514,7 +496,7 @@ export function GameCanvas() {
 
       const doorIds = DOOR_TILE_IDS_BY_LANDMARK_ID[lm.id];
       const doorTiles = doorIds ? findDoorTilesByIds(doorIds) : [];
-      const doorBox = doorTiles.length ? aabbFromDoorTiles(doorTiles, lm.id === "lm-bank" ? 0 : 2) : null;
+      const doorBox = doorTiles.length ? aabbFromDoorTiles(doorTiles) : null;
 
       let highlightBox = lm.kind === "board" && face ? face : doorBox ?? aabb;
 
@@ -574,7 +556,7 @@ export function GameCanvas() {
       cw.add({ x: left, y: top, w: houseWidthTiles * TILE_SIZE, h: houseHeightTiles * TILE_SIZE });
     }
 
-    const sceneryActors = new PIXI.Container();
+    const sceneryworld = new PIXI.Container();
     const sceneryOverlay = new PIXI.Container();
 
     for (const obj of scenery) {
@@ -730,39 +712,39 @@ export function GameCanvas() {
       }
 
       setCharacterDepthFromWorldY(s as any, py + TILE_SIZE);
-      sceneryActors.addChild(s as any);
+      sceneryworld.addChild(s as any);
     }
 
-    if (playerSpriteRef.current) {
-      layers.player.removeChildren();
-      layers.player.addChild(playerSpriteRef.current.sprite as any);
+    if (characterSpriteRef.current) {
+      layers.characters.removeChildren();
+      layers.characters.addChild(characterSpriteRef.current.sprite as any);
     }
     
-    layers.actors.addChild(sceneryActors as any);
+    layers.world.addChild(sceneryworld as any);
     layers.buildingDetail.addChild(sceneryOverlay as any);
 
-    layers.actors.sortChildren();
+    layers.world.sortChildren();
     layers.buildingDetail.sortChildren();
     layers.overlay.sortChildren();
   }, [currentMapId, map, assetsReady]);
 
   useEffect(() => {
     const cameraLayer = cameraLayerRef.current;
-    const ps = playerSpriteRef.current;
-    if (!cameraLayer || !ps) return;
+    const cs = characterSpriteRef.current;
+    if (!cameraLayer || !cs) return;
     
     cameraLayer.x = -cameraX;
     cameraLayer.y = WORLD_OFFSET_Y;
 
-    ps.sprite.x = player.x;
-    ps.sprite.y = player.y + WORLD_OFFSET_Y;
+    cs.sprite.x = characters.x;
+    cs.sprite.y = characters.y + WORLD_OFFSET_Y;
 
-    ps.setDirection(player.dir, player.moving);
+    cs.setDirection(characters.dir, characters.moving);
 
-    setCharacterDepthFromWorldY(ps.sprite as any, player.y + WORLD_OFFSET_Y);
+    setCharacterDepthFromWorldY(cs.sprite as any, characters.y + WORLD_OFFSET_Y);
 
-    prevPosRef.current = { x: player.x, y: player.y };
-  }, [player.x, player.y, player.dir, player.moving, cameraX]);
+    prevPosRef.current = { x: characters.x, y: characters.y };
+  }, [characters.x, characters.y, characters.dir, characters.moving, cameraX]);
 
   useEffect(() => {
     const app = appRef.current;
@@ -793,7 +775,7 @@ export function GameCanvas() {
     if (!app) return;
 
     const update = () => {
-      const ps = playerSpriteRef.current;
+      const ps = characterSpriteRef.current;
       if (!ps) return;
 
       const px = ps.sprite.x;
@@ -840,7 +822,7 @@ export function GameCanvas() {
 
   useEffect(() => {
   if (inventory.size > lastCountRef.current) {
-    const sprite = playerSpriteRef.current;
+    const sprite = characterSpriteRef.current;
     const layers = layersRef.current;
     const app = appRef.current;
 
@@ -850,12 +832,12 @@ export function GameCanvas() {
       const texture = PIXI.Texture.from(PROJECT_INVENTORY_ICONS[lastItemId] || PROJECT_INVENTORY_ICONS[0]);
 
       playItemAcquiredEffect(
-        layers.player, 
+        layers.characters, 
         sprite.sprite.x, 
         sprite.sprite.y, 
         texture,
         () => {
-          const isMaster = inventory.size >= 5;
+          const isMaster = inventory.size >= MAX_INVENTORY;
           
           if (isMaster) {
             const iconPaths = SLOTS.map(id => PROJECT_INVENTORY_ICONS[id]);
@@ -863,7 +845,7 @@ export function GameCanvas() {
             playMasterSequence(app, sprite.sprite, iconPaths, () => {
               setTimeout(() => {
                 setDialogue({
-                  npcId: "player",
+                  npcId: "characters",
                   index: 0,
                   lines: [
                     "......!",
@@ -894,7 +876,7 @@ export function GameCanvas() {
 
   useEffect(() => {
     if (prevUiMode.current === "dialogue" && uiMode === "game") {
-      if (inventory.size >= 5) {
+      if (inventory.size >= MAX_INVENTORY) {
         setTimeout(() => {
           const slots = document.querySelectorAll('.hud-slot');
           console.log("Found slots after dialogue:", slots.length); 
@@ -918,12 +900,14 @@ export function GameCanvas() {
   }, [uiMode, inventory.size]);
 
   useEffect(() => {
-    const audio = new Audio(bgm_town); 
-    audio.loop = true;
-    bgmRef.current = audio;
+    if(!bgmRef.current) {
+      const audio = new Audio(bgm_town); 
+      audio.loop = true;
+      bgmRef.current = audio;
+    }
 
-    audio.volume = isSoundEnabled ? 0.4 : 0;
-
+    const audio = bgmRef.current;
+    audio.volume = isSoundEnabled ? BGM_VOLUME : 0;
     const startBgm = () => {
       audio.play()
         .then(() => {
@@ -952,7 +936,7 @@ export function GameCanvas() {
 
   useEffect(() => {
     if (bgmRef.current) {
-      bgmRef.current.volume = isSoundEnabled ? 0.4 : 0;
+      bgmRef.current.volume = isSoundEnabled ? BGM_VOLUME : 0;
     }
   }, [isSoundEnabled]);
 

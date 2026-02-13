@@ -1,6 +1,6 @@
 import { sound } from "@pixi/sound";
 import { getDefaultStore } from "jotai";
-import { soundEnabledAtom } from "../state/gameAtoms";
+import { soundEnabledAtom } from "../state/stateAtoms";
 
 import coinSound from "../../assets/sounds/coin.mp3";
 import walkondirt1 from "../../assets/sounds/walkondirt1.mp3";
@@ -13,10 +13,11 @@ import walkonpath from "../../assets/sounds/walkonpath.mp3";
 import itemspinning from "../../assets/sounds/itemspinning.mp3";
 import master from "../../assets/sounds/master.mp3";
 
+export const BGM_VOLUME = 0.5;
 const DIRT_CODES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
 const PATH_CODES = [13];
 
-let _inited = false;
+let isSoundInitialized = false;
 
 const PATH_SLICES: Array<[number, number]> = [
   [0.0, 0.35],
@@ -26,8 +27,8 @@ const PATH_SLICES: Array<[number, number]> = [
 ];
 
 export const initSounds = () => {
-  if (_inited) return;
-  _inited = true;
+  if (isSoundInitialized) return;
+  isSoundInitialized = true;
 
   if (!sound.exists("coin")) sound.add("coin", coinSound);
 
@@ -48,7 +49,7 @@ export const initSounds = () => {
 const randRate = () => 0.95 + Math.random() * 0.1;
 
 const safePlay = (alias: string, opts?: Parameters<typeof sound.play>[1]) => {
-  if (!_inited) return;
+  if (!isSoundInitialized) return;
 
   const store = getDefaultStore();
   const isSoundEnabled = store.get(soundEnabledAtom);
@@ -61,14 +62,14 @@ const safePlay = (alias: string, opts?: Parameters<typeof sound.play>[1]) => {
 
   try {
     sound.play(alias, opts as any);
-  } catch {
+  } catch (err) {
     // ignore
   }
 };
 
 export const playCoinSound = () =>
   safePlay("coin", {
-    volume: 0.4,
+    volume: BGM_VOLUME,
     speed: randRate(),
   } as any);
 
@@ -90,7 +91,7 @@ export const playStepByCoords = (
     const [start, end] = PATH_SLICES[i];
 
     safePlay("path", {
-      volume: 0.2,
+      volume: BGM_VOLUME,
       speed,
       start,
       end,
@@ -101,17 +102,17 @@ export const playStepByCoords = (
 
   if (DIRT_CODES.includes(code)) {
     const i = 1 + Math.floor(Math.random() * 3);
-    safePlay(`dirt${i}`, { volume: 0.15, speed } as any);
+    safePlay(`dirt${i}`, { volume: BGM_VOLUME, speed } as any);
     return;
   }
 
   const i = 1 + Math.floor(Math.random() * 3);
-  safePlay(`grass${i}`, { volume: 0.15, speed } as any);
+  safePlay(`grass${i}`, { volume: BGM_VOLUME, speed } as any);
 };
 
 export const playMasterSpin = () => {
   safePlay("master_spin", {
-    volume: 0.6,
+    volume: BGM_VOLUME,
     loop: true
   } as any);
 };
@@ -124,7 +125,7 @@ export const stopMasterSpin = () => {
 
 export const playMasterImpact = () => {
   safePlay("master_impact", {
-    volume: 0.8,
+    volume: BGM_VOLUME,
     speed: 1.0,
   } as any);
 };

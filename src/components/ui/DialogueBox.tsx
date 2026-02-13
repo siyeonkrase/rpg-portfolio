@@ -1,41 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
-import { dialogueAtom, uiModeAtom } from "../../game/state/gameAtoms";
-import { GAME_ASSETS } from "../../game/data/gameAssets"; 
-
-function Portrait() {
-  const scale = 4;
-  const frame = 32;
-  const crop = 32; 
-
-  return (
-    <div
-      style={{
-        width: crop * scale,
-        height: crop * scale,
-        overflow: "hidden",
-        borderRadius: 12,
-        border: "3px solid #555",
-        backgroundColor: "#1a1a1a",
-        boxShadow: "inset 0 0 10px rgba(0,0,0,0.8)",
-        flexShrink: 0,
-      }}
-    >
-      <div
-        style={{
-          width: frame,
-          height: frame,
-          backgroundImage: `url(${GAME_ASSETS.villagerManPng})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: `0px 0px`,
-          imageRendering: "pixelated",
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-        }}
-      />
-    </div>
-  );
-}
+import { dialogueAtom, uiModeAtom } from "../../game/state/stateAtoms";
 
 export function DialogueBox() {
   const [dialogue, setDialogue] = useAtom(dialogueAtom);
@@ -105,7 +70,6 @@ export function DialogueBox() {
         animation: "slideUp 0.3s ease-out"
       }}
     >
-      {/* <Portrait /> */}
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
         <div style={{ 

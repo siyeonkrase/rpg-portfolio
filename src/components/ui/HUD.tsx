@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { activeProjectAtom, inventoryAtom, isMasterModeAtom, manualOpenAtom, uiModeAtom } from "../../game/state/gameAtoms";
+import { activeProjectAtom, inventoryAtom, isMaxInventoryModeAtom, helpOpenAtom, uiModeAtom } from "../../game/state/stateAtoms";
 import { PROJECT_INVENTORY_ICONS } from "../../game/data/projectInventory";
 import { playCoinSound } from "../../game/utils/soundManager";
 import "./HUD.css";
 import styled, { css, keyframes } from "styled-components";
-import manualIcon from "../../assets/manualIcon.png"
+import { GAME_ASSETS } from "../../game/data/gameAssets";
 
 export const SLOTS = ["flickfacts", "chromeapp", "crypto", "wedding", "bento"] as const;
 
@@ -25,12 +25,6 @@ const bounceTriplet = keyframes`
   44%  { transform: translateY(-3px); }
   48%  { transform: translateY(0); }
   100% { transform: translateY(0); }
-`;
-
-const masterGlow = keyframes`
-  0% { box-shadow: 0 0 5px #00ff88; border-color: #00ff88; }
-  50% { box-shadow: 0 0 20px #00ff88; border-color: #fff; }
-  100% { box-shadow: 0 0 5px #00ff88; border-color: #00ff88; }
 `;
 
 const Wrap = styled.button`
@@ -74,11 +68,11 @@ const pulseGlow = keyframes`
   50% { filter: drop-shadow(0 0 8px #00d4ff) brightness(1.3); }
 `;
 
-const StyledSlot = styled.div<{ $isMaster: boolean; $has: boolean }>`
+const StyledSlot = styled.div<{ $isMaxInven: boolean; $has: boolean }>`
   width: 48px;
   height: 48px;
-  background: ${props => props.$isMaster ? "rgba(0, 30, 60, 0.7)" : "rgba(0, 0, 0, 0.6)"};
-  border: 2px solid ${props => props.$isMaster ? "#00d4ff" : "#444"};
+  background: ${props => props.$isMaxInven ? "rgba(0, 30, 60, 0.7)" : "rgba(0, 0, 0, 0.6)"};
+  border: 2px solid ${props => props.$isMaxInven ? "#00d4ff" : "#444"};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -87,7 +81,7 @@ const StyledSlot = styled.div<{ $isMaster: boolean; $has: boolean }>`
   position: relative;
   overflow: hidden;
 
-  ${props => props.$isMaster && props.$has && css`
+  ${props => props.$isMaxInven && props.$has && css`
     cursor: pointer;
     border-color: #fff;
     box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
@@ -103,7 +97,7 @@ const StyledSlot = styled.div<{ $isMaster: boolean; $has: boolean }>`
   `}
 
   &:hover {
-    ${props => props.$isMaster && props.$has && css`
+    ${props => props.$isMaxInven && props.$has && css`
       transform: translateY(-4px) scale(1.05);
       background: rgba(0, 212, 255, 0.2);
       box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
@@ -118,39 +112,14 @@ const StyledSlot = styled.div<{ $isMaster: boolean; $has: boolean }>`
   }
 `;
 
-const StatusLight = styled.div`
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #00ff88;
-  box-shadow: 0 0 5px #00ff88;
-  z-index: 3;
-`;
-
-const MasterHeader = styled.div`
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: #00d4ff;
-  white-space: nowrap;
-  letter-spacing: 2px;
-  font-weight: bold;
-  text-shadow: 0 0 5px #00d4ff;
-`;
-
 interface InventorySlotProps {
   id: string;
   has: boolean;
-  isMaster: boolean;
+  isMaxInven: boolean;
   className?: string;
 }
 
-function InventorySlot({ id, has, isMaster, className }: InventorySlotProps) {
+function InventorySlot({ id, has, isMaxInven, className }: InventorySlotProps) {
   const [animate, setAnimate] = useState(false);
   const icon = PROJECT_INVENTORY_ICONS[id] ?? null;
   
@@ -167,7 +136,7 @@ function InventorySlot({ id, has, isMaster, className }: InventorySlotProps) {
   }, [has]);
 
   const handleClick = () => {
-    if (isMaster && has) {
+    if (isMaxInven && has) {
       setActiveProject(id);
       setUiMode("project");
     }
@@ -175,34 +144,33 @@ function InventorySlot({ id, has, isMaster, className }: InventorySlotProps) {
 
   return (
     <StyledSlot 
-      $isMaster={isMaster} 
+      $isMaxInven={isMaxInven} 
       $has={has}
       className={`inventory-slot ${!has ? "empty" : ""} ${animate ? "acquired" : ""} ${className || ""}`}
       onClick={handleClick}
     >
       {has && icon ? <img src={icon} alt={id} className="inventory-icon" /> : null}
-      {/* {isMaster && has && <StatusLight />} */}
     </StyledSlot>
   );
 }
 
 export function HUD() {
   const inventory = useAtomValue(inventoryAtom);
-  const isMaster = useAtomValue(isMasterModeAtom);
-  const setManualOpen = useSetAtom(manualOpenAtom);
+  const isMaxInven = useAtomValue(isMaxInventoryModeAtom);
+  const setHelpOpen = useSetAtom(helpOpenAtom);
 
   const [hasPlayedEffect, setHasPlayedEffect] = useState(false);
 
   return (
-    <div className={`hud-container ${isMaster ? "master-hud" : ""}`}>
+    <div className={`hud-container ${isMaxInven ? "master-hud" : ""}`}>
 
       <Wrap
         type="button"
-        onClick={() => setManualOpen(true)}
-        aria-label="Open manual"
-        title="Manual"
+        onClick={() => setHelpOpen(true)}
+        aria-label="Open help"
+        title="Help"
       >
-        <img src={manualIcon} alt="Manual" width={40} height={40} style={{ imageRendering: "pixelated" }} />
+        <img src={GAME_ASSETS.helpIcon} alt="Help" width={40} height={40} style={{ imageRendering: "pixelated" }} />
       </Wrap>
 
       {SLOTS.map((id) => (
@@ -211,7 +179,7 @@ export function HUD() {
           key={id} 
           id={id} 
           has={inventory.has(id)} 
-          isMaster={isMaster} 
+          isMaxInven={isMaxInven} 
         />
       ))}
     </div>

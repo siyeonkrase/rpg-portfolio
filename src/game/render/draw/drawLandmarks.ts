@@ -4,7 +4,7 @@ import { landmarks, houses, type LandmarkKind } from "../../data/maps";
 import { tiles } from "../tilesets/tileset";
 import { townTiles } from "../tilesets/townTileset";
 import { cityTiles } from "../tilesets/cityTileset";
-import { setDepth } from "../../pixi/depthSort";
+import { setDepth } from "../../engine/depth";
 import { GAME_ASSETS } from "../../data/gameAssets";
 
 export type PriceCell = { text: PIXI.Text; row: number; col: number };
@@ -165,7 +165,7 @@ function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWor
       s.width = TILE_SIZE;
       s.height = TILE_SIZE;
 
-      setDepth(s, "building");
+      setDepth(s as any, "buildingDetail");
       container.addChild(s as any);
     }
   }
@@ -239,7 +239,7 @@ function drawHouses(container: PIXI.Container, kind: "orangeM" | "orangeS" | "bl
     s.y = top;
     s.width = TILE_SIZE;
     s.height = TILE_SIZE;
-    setDepth(s, "building");
+    setDepth(s as any, "world");
     container.addChild(s as any);
   }
   for (let i = 0; i < houseWidthTiles; i++) {
@@ -248,7 +248,7 @@ function drawHouses(container: PIXI.Container, kind: "orangeM" | "orangeS" | "bl
     s.y = top + TILE_SIZE;
     s.width = TILE_SIZE;
     s.height = TILE_SIZE;
-    setDepth(s, "building");
+    setDepth(s as any, "world");
     container.addChild(s as any);
   }
   for (let i = 0; i < houseWidthTiles; i++) {
@@ -257,7 +257,7 @@ function drawHouses(container: PIXI.Container, kind: "orangeM" | "orangeS" | "bl
     s.y = top + TILE_SIZE * 2;
     s.width = TILE_SIZE;
     s.height = TILE_SIZE;
-    setDepth(s, "building");
+    setDepth(s as any, "world");
     container.addChild(s as any);
   }
 }
@@ -275,7 +275,7 @@ function createBankBillboard(
   const g = new PIXI.Graphics();
   g.x = screenLeft;
   g.y = screenTop;
-  setDepth(g, "decor", { useBottom: false });
+  setDepth(g as any, "buildingDetail");
   container.addChild(g as any);
 
   const margin = 2;
@@ -300,7 +300,7 @@ function createBankBillboard(
       txt.x = screenLeft + margin + c * cellW + 1;
       txt.y = screenTop + margin + topH + 2 + r * cellH + 1;
 
-      setDepth(txt, "decor", { useBottom: false });
+      setDepth(txt as any, "buildingDetail");
       container.addChild(txt as any);
       cells.push({ text: txt, row: r, col: c });
     }

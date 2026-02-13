@@ -1,38 +1,11 @@
 import { useEffect } from "react";
 import { useAtom, useSetAtom } from "jotai";
-import { activeProjectAtom } from "../../game/state/gameAtoms";
-import { closeProjectAtom } from "../../game/state/inventoryAtoms";
-import { GAME_ASSET_URLS } from "../../game/data/gameAssets";
+import { activeProjectAtom } from "../../game/state/stateAtoms";
+import { closeProjectAtom } from "../../game/state/actionAtoms";
+import { MODAL_ASSETS, MODAL_ASSET_URLS, preloadImages } from "../../game/data/gameAssets";
 import styled from "styled-components";
 
-import movieModalPng from "../../assets/modal/movieModal.png"; 
-import comModalPng from "../../assets/modal/comModal.png";
-import cryptoModalPng from "../../assets/modal/bankModal.png";
-import weddingModalPng from "../../assets/modal/weddingModal.png";
-import kanbanModalPng from "../../assets/modal/kanbanModal.png";
-
-import weddingShot from "../../assets/screenshots/wedding.png";
-import movieShot from "../../assets/screenshots/flickfacts.png";
-import bentoShot from "../../assets/screenshots/bento.png";
-import chromeShot from "../../assets/screenshots/chrome.png";
-import cryptoShot from "../../assets/screenshots/crypto.png";
-
 type ThemeKey = "movie" | "computer" | "crypto" | "wedding" | "kanban";
-
-function preloadImages(urls: string[]) {
-  return Promise.all(
-    urls.map(
-      (src) =>
-        new Promise<void>((resolve) => {
-          const img = new Image();
-          (img as any).decoding = "async";
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = src;
-        })
-    )
-  );
-}
 
 const ScrollableText = styled.div<{ themeData: ModalTheme }>`
   flex: 1;
@@ -68,7 +41,7 @@ const ScrollableText = styled.div<{ themeData: ModalTheme }>`
 
 const THEMES = {
   movie: {
-    bg: movieModalPng,
+    bg: MODAL_ASSETS.movieModalPng,
     width: "800px",
     height: "650px",
     padding: "135px 80px 20px",
@@ -95,7 +68,7 @@ const THEMES = {
     }
   },
   computer: {
-    bg: comModalPng,
+    bg: MODAL_ASSETS.comModalPng,
     width: "800px",
     height: "650px",
     padding: "90px 50px 30px",
@@ -128,7 +101,7 @@ const THEMES = {
     }
   },
   crypto: {
-    bg: cryptoModalPng,
+    bg: MODAL_ASSETS.cryptoModalPng,
     width: "800px",
     height: "650px",
     padding: "120px 60px 30px",
@@ -155,7 +128,7 @@ const THEMES = {
     }
   },
   wedding: {
-    bg: weddingModalPng,
+    bg: MODAL_ASSETS.weddingModalPng,
     width: "800px",
     height: "650px",
     padding: "130px 60px 40px", 
@@ -189,7 +162,7 @@ const THEMES = {
     }
   },
   kanban: {
-    bg: kanbanModalPng, 
+    bg: MODAL_ASSETS.kanbanModalPng, 
     width: "800px",
     height: "650px",
     padding: "130px 60px 40px",
@@ -235,10 +208,10 @@ const PROJECTS: Record<string, Project> = {
     title: "FlickFacts",
     blurb:
       "FlickFacts is a movie discovery web application that helps users explore films by genre and ratings while previewing trailers directly on the homepage. It provides a clean, intuitive browsing experience for users who want quick insights into movies before watching. Designed and developed the entire frontend using React, focusing on intuitive navigation and clean UI. Implemented genre-based filtering, rating-based sorting, and embedded YouTube trailer playback. Learned how to structure reusable React components and integrate external APIs for dynamic content.",
-    tech: ["React.js", "JavaScript", "Node.js", "CSS", "HTML", "YouTube Embed API", "TMDB API"],
+    tech: ["React.js", "JavaScript", "Node.js", "CSS", "HTML", "YouTube Embed API", "IMDb API"],
     demoUrl: "https://siyeonkrase.github.io/movie-web-service/",
     repoUrl: "https://github.com/yourname/flickfacts",
-    posterUrl: movieShot,
+    posterUrl: MODAL_ASSETS.movieShot,
     theme: "movie",
   },
   wedding: {
@@ -248,7 +221,7 @@ const PROJECTS: Record<string, Project> = {
     tech: ["HTML", "CSS", "JavaScript", "Responsive Web Design", "Google Maps Embed API"],
     demoUrl: "https://siyeonkrase.github.io/weddinginvitation/",
     repoUrl: "https://github.com/yourname/wedding",
-    posterUrl: weddingShot,
+    posterUrl: MODAL_ASSETS.weddingShot,
     theme: "wedding",
   },
   crypto: {
@@ -258,7 +231,7 @@ const PROJECTS: Record<string, Project> = {
     tech: ["React.js", "TypeScript", "Styled-Components", "CSS", "HTML"],
     demoUrl: "https://siyeonkrase.github.io/crypto-tracker/",
     repoUrl: "https://github.com/yourname/crypto",
-    posterUrl: cryptoShot,
+    posterUrl: MODAL_ASSETS.cryptoShot,
     theme: "crypto",
   },
   bento: {
@@ -268,7 +241,7 @@ const PROJECTS: Record<string, Project> = {
     tech: ["React.js", "TypeScript", "styled-components", "CSS", "HTML"],
     demoUrl: "https://siyeonkrase.github.io/kanban-board/",
     repoUrl: "https://example.com",
-    posterUrl: bentoShot,
+    posterUrl: MODAL_ASSETS.bentoShot,
     theme: "kanban",
   },
 
@@ -276,10 +249,10 @@ const PROJECTS: Record<string, Project> = {
     title: "Chrome Start Page Dashboard",
     blurb:
       "A personalized start-page web application designed for Chrome’s new-tab experience. It helps users begin their day with essential information such as time, weather, location, and motivational content in a clean, distraction-free layout. Designed and developed a personalized dashboard using React. Implemented real-time updates, persistent user data via local storage, dynamic backgrounds, and API-based weather integration. Focused on building a clean, responsive layout optimized for daily use.",
-    tech: ["React.js", "JavaScript", "HTML", "CSS", "OpenWeather API", "Local Storage"],
+    tech: ["JavaScript", "HTML", "CSS", "OpenWeather API", "Local Storage"],
     demoUrl: "https://siyeonkrase.github.io/ChromeApp/",
     repoUrl: "https://example.com",
-    posterUrl: chromeShot,
+    posterUrl: MODAL_ASSETS.chromeShot,
     theme: "computer",
   },
 
@@ -417,22 +390,7 @@ export function ProjectModal() {
   const currentTheme = project ? THEMES[project.theme] : THEMES.computer;
 
   useEffect(() => {
-    const urls = [
-      movieModalPng,
-      comModalPng,
-      cryptoModalPng,
-      weddingModalPng,
-      kanbanModalPng,
-      weddingShot,
-      movieShot,
-      bentoShot,
-      chromeShot,
-      cryptoShot,
-    ];
-
-    preloadImages(urls).then(() => {
-      // console.log("[preload][modal] done", urls.length);
-    });
+    preloadImages(MODAL_ASSET_URLS);
   }, []);
 
   useEffect(() => {
@@ -511,7 +469,7 @@ export function ProjectModal() {
         <div style={{ marginTop: "auto", padding: "10px 0", textAlign: "center" }}>
           <a
             href={project.demoUrl}
-            target="_blank"
+            target="blank"
             rel="noreferrer"
             style={{
               display: "inline-block",

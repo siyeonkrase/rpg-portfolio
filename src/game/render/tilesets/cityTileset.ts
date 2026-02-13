@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import tilesetImage from "../../../assets/city_tilemap_packed.png";
+import tilesetImage from "../../../assets/image/tilemap/city_tilemap_packed.png";
 
 export const TILESET_TILE_SIZE = 16;
 

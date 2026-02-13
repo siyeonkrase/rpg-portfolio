@@ -3,7 +3,7 @@ import { playMasterSpin, stopMasterSpin, playMasterImpact } from "../../utils/so
 
 export function playMasterSequence(
   app: PIXI.Application, 
-  player: PIXI.Container, 
+  characters: PIXI.Container, 
   icons: string[],
   onComplete?: () => void
 ) {
@@ -22,7 +22,7 @@ export function playMasterSequence(
     const sprite = PIXI.Sprite.from(iconPath);
     sprite.anchor.set(0.5);
     sprite.scale.set(0);
-    const parent = player.parent || app.stage;
+    const parent = characters.parent || app.stage;
     parent.addChild(sprite as any);
     sprites.push(sprite);
   });
@@ -42,15 +42,15 @@ export function playMasterSequence(
       const itemAngle = angle + (i / count) * Math.PI * 2;
 
       if (phase === 'orbit') {
-        const targetX = player.x + Math.cos(itemAngle) * ORBIT_RADIUS;
-        const targetY = player.y + Math.sin(itemAngle) * ORBIT_RADIUS - 20;
+        const targetX = characters.x + Math.cos(itemAngle) * ORBIT_RADIUS;
+        const targetY = characters.y + Math.sin(itemAngle) * ORBIT_RADIUS - 20;
         sprite.x += (targetX - sprite.x) * 0.2;
         sprite.y += (targetY - sprite.y) * 0.2;
         if (sprite.scale.x < ICON_SCALE) sprite.scale.x += 0.05;
         sprite.scale.y = sprite.scale.x;
       } else {
-        sprite.x += (player.x - sprite.x) * 0.3;
-        sprite.y += (player.y - sprite.y) * 0.3;
+        sprite.x += (characters.x - sprite.x) * 0.3;
+        sprite.y += (characters.y - sprite.y) * 0.3;
         sprite.scale.set(sprite.scale.x * 0.8);
         sprite.alpha -= 0.1;
         if (sprite.alpha <= 0) sprite.destroy();
@@ -61,7 +61,7 @@ export function playMasterSequence(
       app.ticker.remove(orbitTicker);
       stopMasterSpin();
       playMasterImpact();
-      triggerMasterImpact(app, player);
+      triggerMasterImpact(app, characters);
       
       if (onComplete) onComplete();
     }
@@ -70,8 +70,8 @@ export function playMasterSequence(
   app.ticker.add(orbitTicker);
 }
 
-function triggerMasterImpact(app: PIXI.Application, player: PIXI.Container) {
-  const originalPlayerY = player.y;
+function triggerMasterImpact(app: PIXI.Application, characters: PIXI.Container) {
+  const originalcharactersY = characters.y;
   const originalStageX = app.stage.x;
   const originalStageY = app.stage.y;
   
@@ -81,9 +81,9 @@ function triggerMasterImpact(app: PIXI.Application, player: PIXI.Container) {
 
     const jumpHeight = Math.sin(time * 0.2) * 20; 
     if (time < 15) { 
-      player.y = originalPlayerY - Math.max(0, jumpHeight);
+      characters.y = originalcharactersY - Math.max(0, jumpHeight);
     } else {
-      player.y = originalPlayerY;
+      characters.y = originalcharactersY;
     }
 
     if (time < 20) {

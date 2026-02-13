@@ -1,7 +1,7 @@
 export type MapId = "town";
 export type Dir = "down" | "left" | "right" | "up";
 
-export interface PlayerState {
+export interface charactersState {
   x: number; // px
   y: number; // px
   dir: Dir;

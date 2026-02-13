@@ -61,7 +61,7 @@ Each interaction unlocks an icon in the inventory HUD, reinforcing progression a
 
 ## 🗺️ Architecture Highlights
 
-- Custom **rendering layer system** (ground / actors / building details / player / overlay)
+- Custom **rendering layer system** (ground / world / building details / characters / overlay)
 - Global **collision world** shared between rendering and input systems
 - Decoupled **interaction system** with probe-based AABB detection
 - Keyboard logic abstracted via `useGameKeyboard`
@@ -81,7 +81,7 @@ This project uses third-party assets provided by the following creators and plat
 ### Character Sprites
 - **Mini Villagers Pack by Lyaseek**
   https://lyaseek.itch.io/minifvillagers  
-  Player character sprites.
+  characters character sprites.
 
 ### Sound Effects
 - **Pixabay (User: joentnt)**

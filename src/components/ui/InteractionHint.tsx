@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai";
-import { interactHintAtom, activeProjectAtom } from "../../game/state/gameAtoms";
+import { interactHintAtom, activeProjectAtom } from "../../game/state/stateAtoms";
 import styled from "styled-components";
 
 const HintContainer = styled.div`
@@ -7,7 +7,6 @@ const HintContainer = styled.div`
   left: 50%;
   bottom: 50px;
   transform: translateX(-50%);
-  /* ✅ 핵심: 모달(9999)보다 높은 수치를 주어 블러 위로 올림 */
   z-index: 10050; 
   font-family: "KenneyMiniSquare", sans-serif;
   font-size: 30px;
@@ -17,7 +16,7 @@ const HintContainer = styled.div`
   padding: 8px 12px;
   border-radius: 8px;
   letter-spacing: 0.2px;
-  pointer-events: none; /* 힌트 때문에 마우스 클릭이 막히지 않도록 */
+  pointer-events: none;
   white-space: nowrap;
 `;
 

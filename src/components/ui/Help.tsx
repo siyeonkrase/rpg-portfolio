@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import styled, { keyframes } from "styled-components";
-import { manualOpenAtom, uiModeAtom } from "../../game/state/gameAtoms";
+import { helpOpenAtom, uiModeAtom } from "../../game/state/stateAtoms";
 
 const popIn = keyframes`
   0% { transform: scale(0.9); opacity: 0; }
@@ -105,9 +105,9 @@ const Btn = styled.button`
   }
 `;
 
-export function Manual() {
-  const isOpen = useAtomValue(manualOpenAtom);
-  const setOpen = useSetAtom(manualOpenAtom);
+export function Help() {
+  const isOpen = useAtomValue(helpOpenAtom);
+  const setOpen = useSetAtom(helpOpenAtom);
   const setUiMode = useSetAtom(uiModeAtom);
 
   const close = useCallback(() => {

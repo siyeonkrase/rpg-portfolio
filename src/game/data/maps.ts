@@ -166,8 +166,6 @@ export const scenery: SceneryData[] = [
   { id: "tree-small-1", x: 23 * TILE_SIZE, y: 5 * TILE_SIZE, kind: "treeGreenSmall" },
   
 
-  // D) CITY: 좌하단/우하단 정원/울타리/나무/우물/꽃 등
-  // (좌하단) 시작점 근처 작은 나무
   { id: "tree-bottom-left-1", x: 0 * TILE_SIZE, y: 7 * TILE_SIZE, kind: "treeGreenSmall" },
 
   // 울타리 블록(ㄱ자 형태)

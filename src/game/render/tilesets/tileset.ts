@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
-import tilesetImage from "../../../assets/tilemap_packed.png";
-import farmTilesetImage from "../../../assets/farm_tilemap_packed.png";
+import tilesetImage from "../../../assets/image/tilemap/tilemap_packed.png";
+import farmTilesetImage from "../../../assets/image/tilemap/farm_tilemap_packed.png";
 
 export const TILESET_TILE_SIZE = 16;
 export const TILESET_TILE_SIZE2 = 18;

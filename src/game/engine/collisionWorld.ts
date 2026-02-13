@@ -1,37 +1,55 @@
-import type { SceneryLike } from "./collisionRules";
 import type { AABB } from "./aabb";
+import { aabbIntersects } from "./aabb";
+import type { SceneryLike } from "./collisionRules";
 import { collidersForScenery } from "./collisionRules";
+
 import { scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE } from "../data/config";
-import type { MapId } from "../data/types";
 
-export type CollisionWorld = { colliders: AABB[]; hitsAny: (box: AABB) => boolean };
+export class CollisionWorld {
+  private solids: AABB[] = [];
 
-function intersects(a: AABB, b: AABB) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  clear() {
+    this.solids = [];
+  }
+
+  add(box: AABB) {
+    this.solids.push(box);
+  }
+
+  addMany(boxes: AABB[]) {
+    for (const b of boxes) this.add(b);
+  }
+
+  hitsAny(box: AABB): boolean {
+    for (const s of this.solids) {
+      if (aabbIntersects(box, s)) return true;
+    }
+    return false;
+  }
 }
 
-export function buildCollisionWorld(mapId: MapId): CollisionWorld {
-  const colliders: AABB[] = [];
+
+export function buildCollisionWorld(): CollisionWorld {
+  const world = new CollisionWorld();
 
   for (const s of scenery as unknown as SceneryLike[]) {
-    if ((s as any).mapId !== mapId) continue;
-    colliders.push(...collidersForScenery(s, TILE_SIZE));
+    world.addMany(collidersForScenery(s, TILE_SIZE));
   }
 
   for (const lm of landmarks) {
     const box = landmarkCollider(lm.kind, lm.x, lm.y);
-    if (box) colliders.push(box);
+    if (box) world.add(box);
   }
 
   for (const h of houses) {
     const px = h.x * TILE_SIZE;
     const py = h.y * TILE_SIZE;
     const box = houseCollider(h.kind, px, py);
-    if (box) colliders.push(box);
+    if (box) world.add(box);
   }
 
-  return { colliders, hitsAny: (box) => colliders.some((c) => intersects(box, c)) };
+  return world;
 }
 
 function landmarkCollider(kind: string, doorCenterX: number, floorY: number): AABB | null {
