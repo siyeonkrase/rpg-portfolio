@@ -120,7 +120,7 @@ interface InventorySlotProps {
 }
 
 function InventorySlot({ id, has, isMaxInven, className }: InventorySlotProps) {
-  const [animate, setAnimate] = useState(false);
+  const [itemAnimate, setItemAnimate] = useState(false);
   const icon = PROJECT_INVENTORY_ICONS[id] ?? null;
   
   const setActiveProject = useSetAtom(activeProjectAtom);
@@ -129,8 +129,8 @@ function InventorySlot({ id, has, isMaxInven, className }: InventorySlotProps) {
   useEffect(() => {
     if (has) {
       playCoinSound();
-      setAnimate(true);
-      const timer = setTimeout(() => setAnimate(false), 500);
+      setItemAnimate(true);
+      const timer = setTimeout(() => setItemAnimate(false), 500);
       return () => clearTimeout(timer);
     }
   }, [has]);
@@ -146,7 +146,7 @@ function InventorySlot({ id, has, isMaxInven, className }: InventorySlotProps) {
     <StyledSlot 
       $isMaxInven={isMaxInven} 
       $has={has}
-      className={`inventory-slot ${!has ? "empty" : ""} ${animate ? "acquired" : ""} ${className || ""}`}
+      className={`inventory-slot ${!has ? "empty" : ""} ${itemAnimate ? "acquired" : ""} ${className || ""}`}
       onClick={handleClick}
     >
       {has && icon ? <img src={icon} alt={id} className="inventory-icon" /> : null}

@@ -1,13 +1,12 @@
-import { Routes, Route, HashRouter, Link } from "react-router-dom";
+import { Routes, Route, HashRouter } from "react-router-dom";
 import GamePage from "./routes/GamePage";
 import StartPage from "./routes/StartPage";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import { GAME_ASSETS } from "./game/data/gameAssets";
 import { useAtom } from "jotai";
 import { soundEnabledAtom } from "./game/state/stateAtoms";
 import { sound } from "@pixi/sound";
 import { useEffect } from "react";
-import { buildCollisionWorld } from "./game/engine/collisionWorld";
 
 
 const SoundToggle = styled.div`

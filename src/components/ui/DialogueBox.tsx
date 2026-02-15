@@ -41,7 +41,7 @@ export function DialogueBox() {
       const canvas = document.querySelector('canvas');
       if (canvas) canvas.focus();
     } else {
-      setDialogue((d) => (d ? { ...d, index: d.index + 1 } : d));
+      setDialogue((dialogue) => (dialogue ? { ...dialogue, index: dialogue.index + 1 } : dialogue));
     }
   };
 

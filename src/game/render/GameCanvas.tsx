@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as PIXI from "pixi.js";
 import { useAtom, useAtomValue } from "jotai";
 import { currentMapIdAtom, charactersAtom, cameraXAtom, activeInteractableAtom, interactHintAtom, activeProjectAtom, inventoryAtom, activeInteractableActionAtom, dialogueAtom, uiModeAtom, soundEnabledAtom } from "../state/stateAtoms";
@@ -175,7 +175,6 @@ function findDoorTilesByIds(ids: string[]): DoorTile[] {
 }
 
 export function GameCanvas() {
-  const [assetsReady, setAssetsReady] = useState(false);
   const [activeInteractable, setActiveInteractable] = useAtom(activeInteractableAtom);
   const [hint, setHint] = useAtom(interactHintAtom);
   const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
@@ -226,8 +225,6 @@ export function GameCanvas() {
         await PIXI.Assets.load(GAME_ASSET_URLS as string[]);
       } catch (e) {
         console.warn("[assets] preload failed (continuing anyway)", e);
-      } finally {
-        if (!cancelled) setAssetsReady(true);
       }
     })();
 
@@ -726,7 +723,7 @@ export function GameCanvas() {
     layers.world.sortChildren();
     layers.buildingDetail.sortChildren();
     layers.overlay.sortChildren();
-  }, [currentMapId, map, assetsReady]);
+  }, [currentMapId, map]);
 
   useEffect(() => {
     const cameraLayer = cameraLayerRef.current;

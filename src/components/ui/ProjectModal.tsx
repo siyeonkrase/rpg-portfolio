@@ -208,7 +208,7 @@ const PROJECTS: Record<string, Project> = {
     title: "FlickFacts",
     blurb:
       "FlickFacts is a movie discovery web application that helps users explore films by genre and ratings while previewing trailers directly on the homepage. It provides a clean, intuitive browsing experience for users who want quick insights into movies before watching. Designed and developed the entire frontend using React, focusing on intuitive navigation and clean UI. Implemented genre-based filtering, rating-based sorting, and embedded YouTube trailer playback. Learned how to structure reusable React components and integrate external APIs for dynamic content.",
-    tech: ["React.js", "JavaScript", "Node.js", "CSS", "HTML", "YouTube Embed API", "IMDb API"],
+    tech: ["React.js", "JavaScript", "Node.js", "CSS", "HTML", "YouTube Embed API", "TMDB API"],
     demoUrl: "https://siyeonkrase.github.io/movie-web-service/",
     repoUrl: "https://github.com/yourname/flickfacts",
     posterUrl: MODAL_ASSETS.movieShot,
