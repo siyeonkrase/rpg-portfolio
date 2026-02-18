@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/rpg-portfolio/static/css/main.bc045100.css",
-    "main.js": "/rpg-portfolio/static/js/main.e4f29976.js",
+    "main.css": "/rpg-portfolio/static/css/main.3163eb33.css",
+    "main.js": "/rpg-portfolio/static/js/main.e947922e.js",
     "static/media/bgm_town.mp3": "/rpg-portfolio/static/media/bgm_town.1c1f3bd4bbb8c7a1b876.mp3",
     "static/media/computerSign.png": "/rpg-portfolio/static/media/computerSign.137b91c5cc5bec26f3b9.png",
     "static/media/cinemaSign.png": "/rpg-portfolio/static/media/cinemaSign.603ee2cd1110a3e7964b.png",
@@ -21,7 +21,7 @@
     "static/media/kanbanModal.png": "/rpg-portfolio/static/media/kanbanModal.955e948445f59fca7cce.png",
     "static/media/movie.png": "/rpg-portfolio/static/media/movie.9a9d8464839960faf365.png",
     "static/media/walkonpath.mp3": "/rpg-portfolio/static/media/walkonpath.a4797f63930a1cb46db3.mp3",
-    "static/media/master.mp3": "/rpg-portfolio/static/media/master.f65684e8e91f5683f947.mp3",
+    "static/media/maxInven.mp3": "/rpg-portfolio/static/media/maxInven.f65684e8e91f5683f947.mp3",
     "static/media/note.png": "/rpg-portfolio/static/media/note.155962ae5c7b7263838e.png",
     "static/media/coin.mp3": "/rpg-portfolio/static/media/coin.a48621223608c3c31630.mp3",
     "static/media/MedodicaRegular.otf": "/rpg-portfolio/static/media/MedodicaRegular.95749ec5a65afd44d159.otf",
@@ -37,11 +37,11 @@
     "static/media/walkondirt3.mp3": "/rpg-portfolio/static/media/walkondirt3.60974b70b459a38a1a2f.mp3",
     "static/media/walkongrass2.mp3": "/rpg-portfolio/static/media/walkongrass2.5c2b1c44989ee1257812.mp3",
     "index.html": "/rpg-portfolio/index.html",
-    "main.bc045100.css.map": "/rpg-portfolio/static/css/main.bc045100.css.map",
-    "main.e4f29976.js.map": "/rpg-portfolio/static/js/main.e4f29976.js.map"
+    "main.3163eb33.css.map": "/rpg-portfolio/static/css/main.3163eb33.css.map",
+    "main.e947922e.js.map": "/rpg-portfolio/static/js/main.e947922e.js.map"
   },
   "entrypoints": [
-    "static/css/main.bc045100.css",
-    "static/js/main.e4f29976.js"
+    "static/css/main.3163eb33.css",
+    "static/js/main.e947922e.js"
   ]
 }
