@@ -13,22 +13,21 @@ export class CollisionWorld {
     this.solids = [];
   }
 
-  add(box: AABB) {
-    this.solids.push(box);
+  add(solid: AABB) {
+    this.solids.push(solid);
   }
 
-  addMany(boxes: AABB[]) {
-    for (const b of boxes) this.add(b);
+  addMany(solids: AABB[]) {
+    for (const solid of solids) this.add(solid);
   }
 
-  hitsAny(box: AABB): boolean {
-    for (const s of this.solids) {
-      if (aabbIntersects(box, s)) return true;
+  hitsAny(hitbox: AABB): boolean {
+    for (const solid of this.solids) {
+      if (aabbIntersects(hitbox, solid)) return true;
     }
     return false;
   }
 }
-
 
 export function buildCollisionWorld(): CollisionWorld {
   const world = new CollisionWorld();
@@ -37,15 +36,15 @@ export function buildCollisionWorld(): CollisionWorld {
     world.addMany(collidersForScenery(s, TILE_SIZE));
   }
 
-  for (const lm of landmarks) {
-    const box = landmarkCollider(lm.kind, lm.x, lm.y);
+  for (const landmark of landmarks) {
+    const box = landmarkCollider(landmark.kind, landmark.x, landmark.y);
     if (box) world.add(box);
   }
 
-  for (const h of houses) {
-    const px = h.x * TILE_SIZE;
-    const py = h.y * TILE_SIZE;
-    const box = houseCollider(h.kind, px, py);
+  for (const house of houses) {
+    const px = house.x * TILE_SIZE;
+    const py = house.y * TILE_SIZE;
+    const box = houseCollider(house.kind, px, py);
     if (box) world.add(box);
   }
 
@@ -53,10 +52,10 @@ export function buildCollisionWorld(): CollisionWorld {
 }
 
 function landmarkCollider(kind: string, doorCenterX: number, floorY: number): AABB | null {
-  const W = { cinema: TILE_SIZE * 6, computer: TILE_SIZE * 4, bank: TILE_SIZE * 4 }[kind];
-  const H = { cinema: TILE_SIZE * 2.2, computer: TILE_SIZE * 2.2, bank: TILE_SIZE * 2.2 }[kind];
-  if (!W || !H) return null;
-  return { x: doorCenterX - W / 2, y: floorY - H, w: W, h: H };
+  const lmWidth = { cinema: TILE_SIZE * 6, computer: TILE_SIZE * 4, bank: TILE_SIZE * 4 }[kind];
+  const lmHeight = { cinema: TILE_SIZE * 2.2, computer: TILE_SIZE * 2.2, bank: TILE_SIZE * 2.2 }[kind];
+  if (!lmWidth || !lmHeight) return null;
+  return { x: doorCenterX - lmWidth / 2, y: floorY - lmHeight, w: lmWidth, h: lmHeight };
 }
 
 function houseCollider(kind: string, tileX: number, tileY: number): AABB | null {

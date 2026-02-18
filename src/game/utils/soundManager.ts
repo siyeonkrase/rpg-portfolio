@@ -11,7 +11,7 @@ import walkongrass2 from "../../assets/sounds/walkongrass2.mp3";
 import walkongrass3 from "../../assets/sounds/walkongrass3.mp3";
 import walkonpath from "../../assets/sounds/walkonpath.mp3";
 import itemspinning from "../../assets/sounds/itemspinning.mp3";
-import master from "../../assets/sounds/master.mp3";
+import maxInven from "../../assets/sounds/maxInven.mp3";
 
 export const BGM_VOLUME = 0.5;
 const DIRT_CODES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -42,8 +42,8 @@ export const initSounds = () => {
 
   if (!sound.exists("path")) sound.add("path", walkonpath);
 
-  if (!sound.exists("master_spin")) sound.add("master_spin", itemspinning);
-  if (!sound.exists("master_impact")) sound.add("master_impact", master);
+  if (!sound.exists("max_inven_spin")) sound.add("max_inven_spin", itemspinning);
+  if (!sound.exists("max_inven_impact")) sound.add("max_inven_impact", maxInven);
 };
 
 const randRate = () => 0.95 + Math.random() * 0.1;
@@ -110,21 +110,21 @@ export const playStepByCoords = (
   safePlay(`grass${i}`, { volume: BGM_VOLUME, speed } as any);
 };
 
-export const playMasterSpin = () => {
-  safePlay("master_spin", {
+export const playMaxInvenSpin = () => {
+  safePlay("max_inven_spin", {
     volume: BGM_VOLUME,
     loop: true
   } as any);
 };
 
-export const stopMasterSpin = () => {
-  if (sound.exists("master_spin")) {
-    sound.stop("master_spin");
+export const stopMaxInvenSpin = () => {
+  if (sound.exists("max_inven_spin")) {
+    sound.stop("max_inven_spin");
   }
 };
 
-export const playMasterImpact = () => {
-  safePlay("master_impact", {
+export const playMaxInvenImpact = () => {
+  safePlay("max_inven_impact", {
     volume: BGM_VOLUME,
     speed: 1.0,
   } as any);

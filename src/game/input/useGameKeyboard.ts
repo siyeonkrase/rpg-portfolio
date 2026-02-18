@@ -25,17 +25,16 @@ export function useGameKeyboard() {
   const [, setCameraX] = useAtom(cameraXAtom);
 
   const uiMode = useAtomValue(uiModeAtom);
-  const setUiMode = useSetAtom(uiModeAtom);
-
   const activeAction = useAtomValue(activeInteractableActionAtom);
+
+  const setUiMode = useSetAtom(uiModeAtom);
   const setActiveProject = useSetAtom(activeProjectAtom);
   const closeProject = useSetAtom(closeProjectAtom);
-
   const setInventory = useSetAtom(inventoryAtom);
 
-  const stepTimerRef = useRef<number>(0);
   const STEP_INTERVAL = 0.35;
 
+  const stepTimerRef = useRef<number>(0);
   const pressedRef = useRef<PressState>({ left: false, right: false, up: false, down: false });
   const lastTimeRef = useRef<number | null>(null);
 
@@ -112,6 +111,7 @@ export function useGameKeyboard() {
 
     const loop = (time: number) => {
       if (lastTimeRef.current == null) lastTimeRef.current = time;
+      // delta time
       const dt = (time - lastTimeRef.current) / 1000;
       lastTimeRef.current = time;
 
@@ -125,6 +125,7 @@ export function useGameKeyboard() {
 
       let dx = 0;
       let dy = 0;
+
       if (left) dx -= 1;
       if (right) dx += 1;
       if (up) dy -= 1;
@@ -133,9 +134,10 @@ export function useGameKeyboard() {
       const isMoving = dx !== 0 || dy !== 0;
 
       if (dx !== 0 && dy !== 0) {
-        const inv = 1 / Math.sqrt(2);
-        dx *= inv;
-        dy *= inv;
+        // inverse: 역수
+        const inverse = 1 / Math.sqrt(2);
+        dx *= inverse;
+        dy *= inverse;
       }
 
       const map = maps["town"];
@@ -155,9 +157,9 @@ export function useGameKeyboard() {
 
           const cw = (globalThis as any).collisionWorld;
 
-          const margin = TILE_SIZE * 0.1;
-          nextX = Math.min(Math.max(nextX, margin), mapWidthPx - margin);
-          nextY = Math.min(Math.max(nextY, margin), VIEWPORT_HEIGHT_PX - margin);
+          const edgeBuffer = TILE_SIZE * 0.1;
+          nextX = Math.min(Math.max(nextX, edgeBuffer), mapWidthPx - edgeBuffer);
+          nextY = Math.min(Math.max(nextY, edgeBuffer), VIEWPORT_HEIGHT_PX - edgeBuffer);
 
           if (cw?.hitsAny) {
             if (cw.hitsAny(footBox(nextX, prev.y))) nextX = prev.x;

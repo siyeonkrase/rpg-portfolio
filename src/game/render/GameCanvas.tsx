@@ -5,10 +5,8 @@ import { currentMapIdAtom, charactersAtom, cameraXAtom, activeInteractableAtom, 
 import { maps, scenery, landmarks, houses } from "../data/maps";
 import { TILE_SIZE, LOGICAL_W, LOGICAL_H, MAX_INVENTORY } from "../data/config";
 import { tiles } from "../render/tilesets/tileset";
-import { townTiles } from "../render/tilesets/townTileset";
-import { cityTiles } from "../render/tilesets/cityTileset";
-import { drawLandmarksAndHouses, attachBillboardTicker, type BillboardInfo, LANDMARK_DEFS, addChurchSprite, DOOR_TILE_IDS_BY_LANDMARK_ID } from "../render/draw/drawLandmarks";
-import { enableDepthSorting, setCharacterDepthFromWorldY, setDepth } from "../engine/depth";
+import { drawWorld, attachBillboardTicker, type BillboardInfo, LANDMARK_DEFS, addChurchSprite, DOOR_TILE_IDS_BY_LANDMARK_ID, drawSceneryObjects, isSolidKind } from "../render/draw/drawWorld";
+import { enableDepthSorting, setDepth } from "../engine/depth";
 import { drawStickyNotesOnBoard } from "../render/draw/drawStickyNotes";
 import { CharacterSprite } from "../character/characterSprite";
 import { makeVillagerAnim } from "../character/characterAnims";
@@ -21,97 +19,32 @@ import { createHighlight, tickHighlights, type HighlightHandle } from "../render
 import { aabbFromDoorTiles } from "../engine/door";
 import type { DoorTile } from "../engine/door";
 import { SLOTS } from "../../components/ui/HUD";
-import { playMasterSequence } from "./draw/drawMasterEffect";
+import { playMaxInvenSequence } from "./draw/drawMaxInvenEffect";
 import bgm_town from "../../assets/sounds/bgm_town.mp3"
 import { BGM_VOLUME } from "../utils/soundManager";
 import { CollisionWorld } from "../engine/collisionWorld";
 
 const WORLD_OFFSET_Y = 0;
 
-const BUILDING_DETAIL_KINDS = new Set<string>([
-  "redWindowCenter1",
-  "redWindowCenter2",
-  "redWindowSide",
-  "redSideDoor",
-  "redBigDoor",
-  "unit",
-  "brownWindowCenter1",
-  "brownWindowCenter2",
-  "brownWindowSide",
-  "brownBigDoor1",
-  "brownBigDoor2",
-  "doorL",
-  "doorR",
-  "signBlueL",
-  "signBlueR",
-  "atm",
-]);
-
-function isBuildingDetailKind(kind: string) {
-  return BUILDING_DETAIL_KINDS.has(kind);
-}
-
 type Layers = {
   ground: PIXI.Container;
   world: PIXI.Container;
-  buildingDetail: PIXI.Container;
-  characters: PIXI.Container;
-  overlay: PIXI.Container;
 };
 
 type Interactable = {
   id: string;
   aabb: AABB;
   hint: string;
-  action: { type: "project"; projectId: string } | { type: "dialogue"; lines: string[] };
+  action: { type: "project"; projectId: string };
 };
 
 function createLayers(): Layers {
   const ground = new PIXI.Container();
   const world = new PIXI.Container();
-  const buildingDetail = new PIXI.Container();
-  const characters = new PIXI.Container();
-  const overlay = new PIXI.Container();
 
   world.sortableChildren = true;
-  buildingDetail.sortableChildren = true;
-  characters.sortableChildren = true;
-  overlay.sortableChildren = true;
 
-  return { ground, world, buildingDetail, characters, overlay };
-}
-
-function isSolidKind(kind: string) {
-  return (
-    kind.startsWith("fence") ||
-    kind.startsWith("treeGreenGroup") ||
-    kind.startsWith("treeYellowGroup") ||
-    kind === "treeGreenSmall" ||
-    kind === "treeYellowSmall" ||
-    kind === "bush" ||
-    kind === "mushroom" ||
-    kind === "plant" ||
-    kind === "trashCan1" ||
-    kind === "trashCan2" ||
-    kind === "boxes1" ||
-    kind === "boxes2" ||
-    kind === "boxes3" ||
-    kind === "boxes4" ||
-    kind === "fireHyd" ||
-    kind === "bench" ||
-    kind === "atm" ||
-    kind === "parkingMeter" ||
-    kind === "barH" ||
-    kind === "unit" ||
-    kind.startsWith("well") ||
-    kind.endsWith("Tall2") ||
-    kind.endsWith("Tall1") ||
-    kind.startsWith("board") ||
-    kind.startsWith("drying") ||
-    kind.startsWith("oneLight") ||
-    kind.startsWith("twoLight") ||
-    kind.startsWith("sunflower")
-  );
+  return { ground, world };
 }
 
 const palette = {
@@ -176,45 +109,40 @@ function findDoorTilesByIds(ids: string[]): DoorTile[] {
 
 export function GameCanvas() {
   const [activeInteractable, setActiveInteractable] = useAtom(activeInteractableAtom);
-  const [hint, setHint] = useAtom(interactHintAtom);
-  const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
+  const [, setHint] = useAtom(interactHintAtom);
   const [, setActiveAction] = useAtom(activeInteractableActionAtom);
   const [, setDialogue] = useAtom(dialogueAtom);
   const [uiMode, setUiMode] = useAtom(uiModeAtom);
-
+  
   const inventory = useAtomValue(inventoryAtom);
   const isSoundEnabled = useAtomValue(soundEnabledAtom);
-
-  const lastCountRef = useRef(inventory.size);
-  const inventoryRef = useRef<Set<string>>(new Set());
+  const activeProject = useAtomValue(activeProjectAtom);
+  const currentMapId = useAtomValue(currentMapIdAtom);
+  const characters = useAtomValue(charactersAtom);
+  const cameraX = useAtomValue(cameraXAtom);
+  
+  const collisionRef = useRef<CollisionWorld | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<PIXI.Application | null>(null);
-
   const rootRef = useRef<PIXI.Container | null>(null);
   const cameraLayerRef = useRef<PIXI.Container | null>(null);
-
   const layersRef = useRef<Layers | null>(null);
 
   const characterSpriteRef = useRef<CharacterSprite | null>(null);
   const prevPosRef = useRef<{ x: number; y: number } | null>(null);
+  
+  const lastCountRef = useRef(inventory.size);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  
+  const highlightsRef = useRef<HighlightHandle[]>([]);
+  const interactablesRef = useRef<Interactable[]>([]);
 
   const billboardsRef = useRef<BillboardInfo[]>([]);
-  const collisionRef = useRef<CollisionWorld | null>(null);
-
-  const highlightsRef = useRef<HighlightHandle[]>([]);
   const boardFaceRef = useRef<Record<string, AABB>>({});
-
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
-
-  const currentMapId = useAtomValue(currentMapIdAtom);
-  const characters = useAtomValue(charactersAtom);
-  const cameraX = useAtomValue(cameraXAtom);
+  const prevUiMode = useRef(uiMode);
 
   const map = maps[currentMapId];
-
-  const interactablesRef = useRef<Interactable[]>([]);
-  const prevUiMode = useRef<string>(uiMode);
 
   useEffect(() => {
     let cancelled = false;
@@ -223,7 +151,9 @@ export function GameCanvas() {
       try {
         await preloadImages(GAME_ASSET_URLS);
         await PIXI.Assets.load(GAME_ASSET_URLS as string[]);
+        if (cancelled) return;
       } catch (e) {
+        if (cancelled) return;
         console.warn("[assets] preload failed (continuing anyway)", e);
       }
     })();
@@ -246,8 +176,6 @@ export function GameCanvas() {
       resolution: window.devicePixelRatio || 1,
     });
 
-    (window as any).pixiApp = app;
-
     const root = new PIXI.Container();
     const cameraLayer = new PIXI.Container();
     root.addChild(cameraLayer as any);
@@ -256,16 +184,11 @@ export function GameCanvas() {
     cameraLayer.sortableChildren = true;
 
     layers.ground.zIndex = 0;
-    layers.world.zIndex = 10;
-    layers.buildingDetail.zIndex = 20;
-    layers.characters.zIndex = 30;
-    layers.overlay.zIndex = 40;
+    layers.world.zIndex = 1000;
 
     cameraLayer.addChild(layers.ground as any);
     cameraLayer.addChild(layers.world as any);
-    cameraLayer.addChild(layers.buildingDetail as any);
-    cameraLayer.addChild(layers.characters as any);
-    cameraLayer.addChild(layers.overlay as any);
+
     cameraLayer.sortChildren();
 
     const tex = PIXI.Texture.from(GAME_ASSETS.villagerManPng);
@@ -295,7 +218,8 @@ export function GameCanvas() {
     (window as any).charactersContainer = characterSprite.sprite;
     (window as any).pixiApp = app;
 
-    layers.characters.addChild(characterSprite.sprite as any);
+    setDepth(characterSprite.sprite as any, "characters", characters.y);
+    layers.world.addChild(characterSprite.sprite as any);
 
     app.stage.addChild(root as any);
     enableDepthSorting(cameraLayer);
@@ -341,7 +265,7 @@ export function GameCanvas() {
       collisionRef.current = null;
       characterSpriteRef.current = null;
       prevPosRef.current = null;
-      delete (globalThis as any).__collisionWorld;
+      delete (globalThis as any).collisionWorld;
     };
   }, []);
 
@@ -358,8 +282,6 @@ export function GameCanvas() {
 
     layers.ground.removeChildren();
     layers.world.removeChildren();
-    layers.buildingDetail.removeChildren();
-    layers.overlay.removeChildren();
 
     for (const h of highlightsRef.current) h.destroy();
     highlightsRef.current = [];
@@ -368,7 +290,7 @@ export function GameCanvas() {
     billboardsRef.current = [];
 
     const tileLayer = new PIXI.Container();
-    setDepth(tileLayer as any, "ground");
+    setDepth(tileLayer as any, "world");
 
     for (let y = 0; y < map.tiles.length; y++) {
       const row = map.tiles[y];
@@ -376,22 +298,18 @@ export function GameCanvas() {
         const tex = groundTexFromCode(row[x]);
         if (!tex) continue;
 
-        const s = new PIXI.Sprite(tex);
-        s.x = x * TILE_SIZE;
-        s.y = y * TILE_SIZE;
-        s.width = TILE_SIZE;
-        s.height = TILE_SIZE;
-        setDepth(s as any, "ground");
-        tileLayer.addChild(s as any);
+        const sprite = new PIXI.Sprite(tex);
+        sprite.x = x * TILE_SIZE;
+        sprite.y = y * TILE_SIZE;
+        sprite.width = TILE_SIZE;
+        sprite.height = TILE_SIZE;
+        setDepth(sprite as any, "world");
+        tileLayer.addChild(sprite as any);
       }
     }
     layers.ground.addChild(tileLayer as any);
 
-    drawLandmarksAndHouses(
-      { building: layers.world, object: layers.world, overlay: layers.overlay } as any,
-      currentMapId,
-      billboardsRef.current
-    );
+    drawWorld({ building: layers.world, object: layers.world, overlay: layers.world } as any, currentMapId, billboardsRef.current);
 
     boardFaceRef.current = {};
 
@@ -415,14 +333,18 @@ export function GameCanvas() {
       const faceW = boardFaceW - offsetX * 2;
       const faceH = boardFaceH - offsetY - bottomOffset;
 
-      drawStickyNotesOnBoard(layers.buildingDetail, faceX, faceY, faceW, faceH, 6);
+      drawStickyNotesOnBoard(layers.world, faceX, faceY, faceW, faceH, 6);
 
       boardFaceRef.current[lm.id] = { x: faceX, y: faceY, w: faceW, h: faceH };
     }
 
     const churchX = 43 * TILE_SIZE;
     const churchY = 6 * TILE_SIZE;
-    addChurchSprite(layers.buildingDetail, churchX, churchY);
+    const church = addChurchSprite(layers.world, churchX, churchY);
+
+    setDepth(church.sprite as any, "world");
+
+    layers.world.sortChildren();
 
     const CHURCH_W_TILES = 5;
     const churchW = CHURCH_W_TILES * TILE_SIZE;
@@ -511,11 +433,9 @@ export function GameCanvas() {
 
 
       highlightsRef.current.push(
-        createHighlight(layers.buildingDetail, projectId, highlightBox, { pad: 0 })
+        createHighlight(layers.world, projectId, highlightBox, { pad: 0 })
       );
     }
-
-    addChurchSprite(layers.buildingDetail, churchX, churchY);
 
     interactablesRef.current.push({
       id: "lm-church",
@@ -537,7 +457,7 @@ export function GameCanvas() {
     };
 
     highlightsRef.current.push(
-      createHighlight(layers.buildingDetail, "wedding", churchDoorBox, { pad: 0 })
+      createHighlight(layers.world, "wedding", churchDoorBox, { pad: 0 })
     );
 
     for (const h of houses) {
@@ -553,176 +473,12 @@ export function GameCanvas() {
       cw.add({ x: left, y: top, w: houseWidthTiles * TILE_SIZE, h: houseHeightTiles * TILE_SIZE });
     }
 
-    const sceneryworld = new PIXI.Container();
-    const sceneryOverlay = new PIXI.Container();
-
-    for (const obj of scenery) {
-      let tex: PIXI.Texture | null = null;
-
-      switch (obj.kind) {
-        case "treeGreenGroup1": tex = tiles.treeGreenGroup1; break;
-        case "treeGreenGroup2": tex = tiles.treeGreenGroup2; break;
-        case "treeGreenGroup3": tex = tiles.treeGreenGroup3; break;
-        case "treeGreenGroup4": tex = tiles.treeGreenGroup4; break;
-        case "treeGreenGroup5": tex = tiles.treeGreenGroup5; break;
-        case "treeGreenGroup6": tex = tiles.treeGreenGroup6; break;
-        case "treeGreenGroup7": tex = tiles.treeGreenGroup7; break;
-        case "treeGreenGroup8": tex = tiles.treeGreenGroup8; break;
-        case "treeGreenGroup9": tex = tiles.treeGreenGroup9; break;
-
-        case "treeYellowGroup1": tex = tiles.treeYellowGroup1; break;
-        case "treeYellowGroup2": tex = tiles.treeYellowGroup2; break;
-        case "treeYellowGroup3": tex = tiles.treeYellowGroup3; break;
-        case "treeYellowGroup4": tex = tiles.treeYellowGroup4; break;
-        case "treeYellowGroup5": tex = tiles.treeYellowGroup5; break;
-        case "treeYellowGroup6": tex = tiles.treeYellowGroup6; break;
-        case "treeYellowGroup7": tex = tiles.treeYellowGroup7; break;
-        case "treeYellowGroup8": tex = tiles.treeYellowGroup8; break;
-        case "treeYellowGroup9": tex = tiles.treeYellowGroup9; break;
-
-        case "bush": tex = tiles.bush; break;
-        case "treeYellowSmall": tex = tiles.treeYellowSmall; break;
-        case "treeGreenSmall": tex = tiles.treeGreenSmall; break;
-        case "plant": tex = tiles.plant; break;
-        case "mushroom": tex = tiles.mushroom; break;
-        case "sunflowerT": tex = tiles.sunflowerT; break;
-        case "sunflowerB": tex = tiles.sunflowerB; break;
-
-        case "treeYellowTall1": tex = tiles.treeYellowTall1; break;
-        case "treeYellowTall2": tex = tiles.treeYellowTall2; break;
-        case "treeGreenTall1": tex = tiles.treeGreenTall1; break;
-        case "treeGreenTall2": tex = tiles.treeGreenTall2; break;
-
-        case "well1": tex = tiles.wellT; break;
-        case "well2": tex = tiles.wellB; break;
-
-        case "fenceSquare1": tex = tiles.fenceSquare1; break;
-        case "fenceSquare2": tex = tiles.fenceSquare2; break;
-        case "fenceSquare3": tex = tiles.fenceSquare3; break;
-        case "fenceSquare4": tex = tiles.fenceSquare4; break;
-        case "fenceSquare5": tex = tiles.fenceSquare5; break;
-        case "fenceSquare6": tex = tiles.fenceSquare6; break;
-        case "fenceSquare7": tex = tiles.fenceSquare7; break;
-        case "fenceSquare8": tex = tiles.fenceSquare8; break;
-
-        case "fenceH1": tex = tiles.fenceH1; break;
-        case "fenceH2": tex = tiles.fenceH2; break;
-        case "fenceH3": tex = tiles.fenceH3; break;
-        case "fenceV1": tex = tiles.fenceV1; break;
-        case "fenceV2": tex = tiles.fenceV2; break;
-        case "fenceV3": tex = tiles.fenceV3; break;
-
-        case "sign": tex = tiles.sign; break;
-
-        case "oneLightPoleT": tex = townTiles.oneLightPoleT; break;
-        case "oneLightPoleB": tex = townTiles.oneLightPoleB; break;
-        case "twoLightPoleLT": tex = townTiles.twoLightPoleLT; break;
-        case "twoLightPoleRT": tex = townTiles.twoLightPoleRT; break;
-        case "twoLightPoleB": tex = townTiles.twoLightPoleB; break;
-
-        case "dryingPole1": tex = townTiles.dryingPole1; break;
-        case "dryingPole2": tex = townTiles.dryingPole2; break;
-        case "dryingPole3": tex = townTiles.dryingPole3; break;
-        case "dryingPole4": tex = townTiles.dryingPole4; break;
-        case "dryingPole5": tex = townTiles.dryingPole5; break;
-
-        case "trashCan1": tex = townTiles.trashCan1; break;
-        case "trashCan2": tex = townTiles.trashCan2; break;
-        case "fireHyd": tex = townTiles.fireHyd; break;
-
-        case "boxes1": tex = townTiles.boxes1; break;
-        case "boxes2": tex = townTiles.boxes2; break;
-        case "boxes3": tex = townTiles.boxes3; break;
-        case "boxes4": tex = townTiles.boxes4; break;
-
-        case "bench": tex = townTiles.bench; break;
-        case "parkingMeter": tex = townTiles.parkingMeter; break;
-        case "barH": tex = townTiles.barH; break;
-
-        case "signRedL": tex = cityTiles.signRedL; break;
-        case "signRedR": tex = cityTiles.signRedR; break;
-        case "signBlueL": tex = cityTiles.signBlueL; break;
-        case "signBlueR": tex = cityTiles.signBlueR; break;
-        case "atm": tex = cityTiles.atm; break;
-
-        case "board1": tex = cityTiles.board1; break;
-        case "board2": tex = cityTiles.board2; break;
-        case "board3": tex = cityTiles.board3; break;
-        case "board4": tex = cityTiles.board4; break;
-        case "board5": tex = cityTiles.board5; break;
-        case "board6": tex = cityTiles.board6; break;
-        case "board7": tex = cityTiles.board7; break;
-        case "board8": tex = cityTiles.board8; break;
-        case "board9": tex = cityTiles.board9; break;
-        case "boardL": tex = cityTiles.boardL; break;
-        case "boardR": tex = cityTiles.boardR; break;
-
-        case "redWindowCenter1": tex = townTiles.redWindowCenter1; break;
-        case "redWindowCenter2": tex = townTiles.redWindowCenter2; break;
-        case "redWindowSide": tex = townTiles.redWindowSide; break;
-        case "redSideDoor": tex = townTiles.redSideDoor; break;
-        case "redBigDoor": tex = townTiles.redBigDoor; break;
-        case "unit": tex = townTiles.unit; break;
-
-        case "brownWindowCenter1": tex = townTiles.brownWindowCenter1; break;
-        case "brownWindowCenter2": tex = townTiles.brownWindowCenter2; break;
-        case "brownWindowSide": tex = townTiles.brownWindowSide; break;
-        case "brownBigDoor1": tex = townTiles.brownBigDoor1; break;
-        case "brownBigDoor2": tex = townTiles.brownBigDoor2; break;
-
-        case "doorL": tex = cityTiles.doorL; break;
-        case "doorR": tex = cityTiles.doorR; break;
-        case "signBlueL": tex = cityTiles.signBlueL; break;
-        case "signBlueR": tex = cityTiles.signBlueR; break;
-        case "atm": tex = cityTiles.atm; break;
-
-        case "tomato": tex = tiles.tomato; break;
-        case "radish": tex = tiles.radish; break;
-        case "corn": tex = tiles.corn; break;
-        case "carrot": tex = tiles.carrot; break;
-        case "carrot2": tex = tiles.carrot2; break;
-
-        default:
-          tex = null;
-          break;
-      }
-
-      if (!tex) continue;
-
-      const px = obj.x;
-      const py = obj.y;
-
-      const s = new PIXI.Sprite(tex);
-      s.x = px;
-      s.y = py;
-      s.width = TILE_SIZE;
-      s.height = TILE_SIZE;
-
-      if (isBuildingDetailKind(obj.kind)) {
-        s.zIndex = 0;
-        sceneryOverlay.addChild(s as any);
-        continue;
-      }
-
-      if (isSolidKind(obj.kind)) {
-        cw.add({ x: px, y: py, w: TILE_SIZE, h: TILE_SIZE });
-      }
-
-      setCharacterDepthFromWorldY(s as any, py + TILE_SIZE);
-      sceneryworld.addChild(s as any);
-    }
+    drawSceneryObjects(scenery, { world: layers.world, buildingDetail: layers.world }, cw, isSolidKind);
 
     if (characterSpriteRef.current) {
-      layers.characters.removeChildren();
-      layers.characters.addChild(characterSpriteRef.current.sprite as any);
+      layers.world.addChild(characterSpriteRef.current.sprite as any);
     }
-    
-    layers.world.addChild(sceneryworld as any);
-    layers.buildingDetail.addChild(sceneryOverlay as any);
-
     layers.world.sortChildren();
-    layers.buildingDetail.sortChildren();
-    layers.overlay.sortChildren();
   }, [currentMapId, map]);
 
   useEffect(() => {
@@ -738,7 +494,7 @@ export function GameCanvas() {
 
     cs.setDirection(characters.dir, characters.moving);
 
-    setCharacterDepthFromWorldY(cs.sprite as any, characters.y + WORLD_OFFSET_Y);
+    // setCharacterDepthFromWorldY(cs.sprite as any, characters.y + WORLD_OFFSET_Y);
 
     prevPosRef.current = { x: characters.x, y: characters.y };
   }, [characters.x, characters.y, characters.dir, characters.moving, cameraX]);
@@ -772,15 +528,15 @@ export function GameCanvas() {
     if (!app) return;
 
     const update = () => {
-      const ps = characterSpriteRef.current;
-      if (!ps) return;
+      const char = characterSpriteRef.current;
+      if (!char) return;
 
-      const px = ps.sprite.x;
-      const py = ps.sprite.y;
+      const cx = char.sprite.x;
+      const cy = char.sprite.y;
 
-      const probe: AABB = {
-        x: px - TILE_SIZE * 0.6,
-        y: py - TILE_SIZE * 0.9,
+      const checker: AABB = {
+        x: cx - TILE_SIZE * 0.6,
+        y: cy - TILE_SIZE * 0.9,
         w: TILE_SIZE * 1.2,
         h: TILE_SIZE * 0.9,
       };
@@ -789,7 +545,7 @@ export function GameCanvas() {
       let hit: Interactable | null = null;
 
       for (const it of list) {
-        if (aabbIntersects(probe, it.aabb)) {
+        if (aabbIntersects(checker, it.aabb)) {
           hit = it;
           break;
         }
@@ -829,17 +585,17 @@ export function GameCanvas() {
       const texture = PIXI.Texture.from(PROJECT_INVENTORY_ICONS[lastItemId] || PROJECT_INVENTORY_ICONS[0]);
 
       playItemAcquiredEffect(
-        layers.characters, 
+        layers.world, 
         sprite.sprite.x, 
         sprite.sprite.y, 
         texture,
         () => {
-          const isMaster = inventory.size >= MAX_INVENTORY;
+          const isMaxInven = inventory.size >= MAX_INVENTORY;
           
-          if (isMaster) {
+          if (isMaxInven) {
             const iconPaths = SLOTS.map(id => PROJECT_INVENTORY_ICONS[id]);
             
-            playMasterSequence(app, sprite.sprite, iconPaths, () => {
+            playMaxInvenSequence(app, sprite.sprite, iconPaths, () => {
               setTimeout(() => {
                 setDialogue({
                   npcId: "characters",
@@ -861,8 +617,7 @@ export function GameCanvas() {
     }
   }
   lastCountRef.current = inventory.size;
-  inventoryRef.current = inventory;
-}, [inventory, setDialogue]);
+}, [inventory]);
 
   useEffect(() => {
     return () => {
@@ -905,6 +660,7 @@ export function GameCanvas() {
 
     const audio = bgmRef.current;
     audio.volume = isSoundEnabled ? BGM_VOLUME : 0;
+
     const startBgm = () => {
       audio.play()
         .then(() => {

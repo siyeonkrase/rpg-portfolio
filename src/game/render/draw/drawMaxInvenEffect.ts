@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js";
-import { playMasterSpin, stopMasterSpin, playMasterImpact } from "../../utils/soundManager";
+import { playMaxInvenSpin, stopMaxInvenSpin, playMaxInvenImpact } from "../../utils/soundManager";
 
-export function playMasterSequence(
+export function playMaxInvenSequence(
   app: PIXI.Application, 
   characters: PIXI.Container, 
   icons: string[],
   onComplete?: () => void
 ) {
-  playMasterSpin();
+  playMaxInvenSpin();
 
   const sprites: PIXI.Sprite[] = [];
   const count = icons.length;
@@ -59,9 +59,9 @@ export function playMasterSequence(
 
     if (sprites.every(s => s.destroyed)) {
       app.ticker.remove(orbitTicker);
-      stopMasterSpin();
-      playMasterImpact();
-      triggerMasterImpact(app, characters);
+      stopMaxInvenSpin();
+      playMaxInvenImpact();
+      triggerMaxInvenImpact(app, characters);
       
       if (onComplete) onComplete();
     }
@@ -70,7 +70,7 @@ export function playMasterSequence(
   app.ticker.add(orbitTicker);
 }
 
-function triggerMasterImpact(app: PIXI.Application, characters: PIXI.Container) {
+function triggerMaxInvenImpact(app: PIXI.Application, characters: PIXI.Container) {
   const originalcharactersY = characters.y;
   const originalStageX = app.stage.x;
   const originalStageY = app.stage.y;

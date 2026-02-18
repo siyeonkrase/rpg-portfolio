@@ -29,11 +29,6 @@ export const GAME_ASSETS = {
   churchBuilding,
   cinemaSign,
   computerSign,
-  // weddingIcon,
-  // movieIcon,
-  // chromeIcon,
-  // cryptoIcon,
-  // bentoIcon,
   villagerManPng,
   speakerOn,
   speakerOff,
@@ -68,10 +63,10 @@ export function preloadImages(urls: readonly string[]) {
   return Promise.all(
     urls.map(
       (src) =>
-        new Promise<void>((resolve) => {
+        new Promise<void>((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve();
-          img.onerror = () => resolve();
+          img.onerror = () => reject(new Error(`Failed to load: ${src}`));
           img.src = src;
         })
     )

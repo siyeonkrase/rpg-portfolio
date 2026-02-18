@@ -162,7 +162,7 @@ export function HUD() {
   const [hasPlayedEffect, setHasPlayedEffect] = useState(false);
 
   return (
-    <div className={`hud-container ${isMaxInven ? "master-hud" : ""}`}>
+    <div className={`hud-container ${isMaxInven ? "max-hud" : ""}`}>
 
       <Wrap
         type="button"

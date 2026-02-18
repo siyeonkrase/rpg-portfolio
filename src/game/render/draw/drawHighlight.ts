@@ -29,7 +29,7 @@ export function createHighlight(
   const g = new PIXI.Graphics();
   const pad = opts?.pad ?? 0;
 
-  setDepth(g as any, (opts?.depthKey ?? "buildingDetail") as any);
+  setDepth(g as any, (opts?.depthKey ?? "effect") as any);
   container.addChild(g as any);
 
   const handle: HighlightHandle = {

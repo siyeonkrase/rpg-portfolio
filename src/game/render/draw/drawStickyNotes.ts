@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { setDepth } from "../../engine/depth";
 
 const POSTIT_COLORS = [
   0xfff2a8, // 연노랑
@@ -87,6 +88,10 @@ export function drawStickyNotesOnBoard(
     note.y = noteY;
     note.rotation = rotation;
     note.zIndex = 1002;
+
+    setDepth(shadow as any, "buildingDetail");
+    setDepth(note as any, "buildingDetail");
+    (note as any).zIndex += 1;
 
     container.addChild(shadow as any);
     container.addChild(note as any);

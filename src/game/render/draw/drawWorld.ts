@@ -6,6 +6,7 @@ import { townTiles } from "../tilesets/townTileset";
 import { cityTiles } from "../tilesets/cityTileset";
 import { setDepth } from "../../engine/depth";
 import { GAME_ASSETS } from "../../data/gameAssets";
+import { CollisionWorld } from "../../engine/collisionWorld";
 
 export type PriceCell = { text: PIXI.Text; row: number; col: number };
 
@@ -16,14 +17,14 @@ export type BillboardInfo =
     }
   | {
       kind: "bank";
-      g: PIXI.Graphics;
+      bilboard: PIXI.Graphics;
       width: number;
       height: number;
       cells: PriceCell[];
     }
   | {
       kind: "sprite";
-      s: PIXI.Sprite;
+      sprite: PIXI.Sprite;
       baseY: number;
       amp: number;
       speed: number;
@@ -45,6 +46,230 @@ type SpriteBillboardOpts = {
   hoverPhase?: number;   
 };
 
+export const BUILDING_DETAIL_KINDS = new Set<string>([
+  "redWindowCenter1",
+  "redWindowCenter2",
+  "redWindowSide",
+  "redSideDoor",
+  "redBigDoor",
+  "unit",
+  "brownWindowCenter1",
+  "brownWindowCenter2",
+  "brownWindowSide",
+  "brownBigDoor1",
+  "brownBigDoor2",
+  "doorL",
+  "doorR",
+  "signBlueL",
+  "signBlueR",
+  "atm",
+]);
+
+export function isBuildingDetailKind(kind: string) {
+  return BUILDING_DETAIL_KINDS.has(kind);
+}
+
+export function drawSceneryObjects(
+  sceneryList: any[], 
+  layers: { world: PIXI.Container; buildingDetail: PIXI.Container },
+  cw: CollisionWorld,
+  isSolidKind: (kind: string) => boolean
+) {
+  for (const obj of sceneryList) {
+    let tex: PIXI.Texture | null = null;
+
+      switch (obj.kind) {
+        case "treeGreenGroup1": tex = tiles.treeGreenGroup1; break;
+        case "treeGreenGroup2": tex = tiles.treeGreenGroup2; break;
+        case "treeGreenGroup3": tex = tiles.treeGreenGroup3; break;
+        case "treeGreenGroup4": tex = tiles.treeGreenGroup4; break;
+        case "treeGreenGroup5": tex = tiles.treeGreenGroup5; break;
+        case "treeGreenGroup6": tex = tiles.treeGreenGroup6; break;
+        case "treeGreenGroup7": tex = tiles.treeGreenGroup7; break;
+        case "treeGreenGroup8": tex = tiles.treeGreenGroup8; break;
+        case "treeGreenGroup9": tex = tiles.treeGreenGroup9; break;
+
+        case "treeYellowGroup1": tex = tiles.treeYellowGroup1; break;
+        case "treeYellowGroup2": tex = tiles.treeYellowGroup2; break;
+        case "treeYellowGroup3": tex = tiles.treeYellowGroup3; break;
+        case "treeYellowGroup4": tex = tiles.treeYellowGroup4; break;
+        case "treeYellowGroup5": tex = tiles.treeYellowGroup5; break;
+        case "treeYellowGroup6": tex = tiles.treeYellowGroup6; break;
+        case "treeYellowGroup7": tex = tiles.treeYellowGroup7; break;
+        case "treeYellowGroup8": tex = tiles.treeYellowGroup8; break;
+        case "treeYellowGroup9": tex = tiles.treeYellowGroup9; break;
+
+        case "bush": tex = tiles.bush; break;
+        case "treeYellowSmall": tex = tiles.treeYellowSmall; break;
+        case "treeGreenSmall": tex = tiles.treeGreenSmall; break;
+        case "plant": tex = tiles.plant; break;
+        case "mushroom": tex = tiles.mushroom; break;
+        case "sunflowerT": tex = tiles.sunflowerT; break;
+        case "sunflowerB": tex = tiles.sunflowerB; break;
+
+        case "treeYellowTall1": tex = tiles.treeYellowTall1; break;
+        case "treeYellowTall2": tex = tiles.treeYellowTall2; break;
+        case "treeGreenTall1": tex = tiles.treeGreenTall1; break;
+        case "treeGreenTall2": tex = tiles.treeGreenTall2; break;
+
+        case "well1": tex = tiles.wellT; break;
+        case "well2": tex = tiles.wellB; break;
+
+        case "fenceSquare1": tex = tiles.fenceSquare1; break;
+        case "fenceSquare2": tex = tiles.fenceSquare2; break;
+        case "fenceSquare3": tex = tiles.fenceSquare3; break;
+        case "fenceSquare4": tex = tiles.fenceSquare4; break;
+        case "fenceSquare5": tex = tiles.fenceSquare5; break;
+        case "fenceSquare6": tex = tiles.fenceSquare6; break;
+        case "fenceSquare7": tex = tiles.fenceSquare7; break;
+        case "fenceSquare8": tex = tiles.fenceSquare8; break;
+
+        case "fenceH1": tex = tiles.fenceH1; break;
+        case "fenceH2": tex = tiles.fenceH2; break;
+        case "fenceH3": tex = tiles.fenceH3; break;
+        case "fenceV1": tex = tiles.fenceV1; break;
+        case "fenceV2": tex = tiles.fenceV2; break;
+        case "fenceV3": tex = tiles.fenceV3; break;
+
+        case "sign": tex = tiles.sign; break;
+
+        case "oneLightPoleT": tex = townTiles.oneLightPoleT; break;
+        case "oneLightPoleB": tex = townTiles.oneLightPoleB; break;
+        case "twoLightPoleLT": tex = townTiles.twoLightPoleLT; break;
+        case "twoLightPoleRT": tex = townTiles.twoLightPoleRT; break;
+        case "twoLightPoleB": tex = townTiles.twoLightPoleB; break;
+
+        case "dryingPole1": tex = townTiles.dryingPole1; break;
+        case "dryingPole2": tex = townTiles.dryingPole2; break;
+        case "dryingPole3": tex = townTiles.dryingPole3; break;
+        case "dryingPole4": tex = townTiles.dryingPole4; break;
+        case "dryingPole5": tex = townTiles.dryingPole5; break;
+
+        case "trashCan1": tex = townTiles.trashCan1; break;
+        case "trashCan2": tex = townTiles.trashCan2; break;
+        case "fireHyd": tex = townTiles.fireHyd; break;
+
+        case "boxes1": tex = townTiles.boxes1; break;
+        case "boxes2": tex = townTiles.boxes2; break;
+        case "boxes3": tex = townTiles.boxes3; break;
+        case "boxes4": tex = townTiles.boxes4; break;
+
+        case "bench": tex = townTiles.bench; break;
+        case "parkingMeter": tex = townTiles.parkingMeter; break;
+        case "barH": tex = townTiles.barH; break;
+
+        case "signRedL": tex = cityTiles.signRedL; break;
+        case "signRedR": tex = cityTiles.signRedR; break;
+        case "signBlueL": tex = cityTiles.signBlueL; break;
+        case "signBlueR": tex = cityTiles.signBlueR; break;
+        case "atm": tex = cityTiles.atm; break;
+
+        case "board1": tex = cityTiles.board1; break;
+        case "board2": tex = cityTiles.board2; break;
+        case "board3": tex = cityTiles.board3; break;
+        case "board4": tex = cityTiles.board4; break;
+        case "board5": tex = cityTiles.board5; break;
+        case "board6": tex = cityTiles.board6; break;
+        case "board7": tex = cityTiles.board7; break;
+        case "board8": tex = cityTiles.board8; break;
+        case "board9": tex = cityTiles.board9; break;
+        case "boardL": tex = cityTiles.boardL; break;
+        case "boardR": tex = cityTiles.boardR; break;
+
+        case "redWindowCenter1": tex = townTiles.redWindowCenter1; break;
+        case "redWindowCenter2": tex = townTiles.redWindowCenter2; break;
+        case "redWindowSide": tex = townTiles.redWindowSide; break;
+        case "redSideDoor": tex = townTiles.redSideDoor; break;
+        case "redBigDoor": tex = townTiles.redBigDoor; break;
+        case "unit": tex = townTiles.unit; break;
+
+        case "brownWindowCenter1": tex = townTiles.brownWindowCenter1; break;
+        case "brownWindowCenter2": tex = townTiles.brownWindowCenter2; break;
+        case "brownWindowSide": tex = townTiles.brownWindowSide; break;
+        case "brownBigDoor1": tex = townTiles.brownBigDoor1; break;
+        case "brownBigDoor2": tex = townTiles.brownBigDoor2; break;
+
+        case "doorL": tex = cityTiles.doorL; break;
+        case "doorR": tex = cityTiles.doorR; break;
+        case "signBlueL": tex = cityTiles.signBlueL; break;
+        case "signBlueR": tex = cityTiles.signBlueR; break;
+        case "atm": tex = cityTiles.atm; break;
+
+        case "tomato": tex = tiles.tomato; break;
+        case "radish": tex = tiles.radish; break;
+        case "corn": tex = tiles.corn; break;
+        case "carrot": tex = tiles.carrot; break;
+        case "carrot2": tex = tiles.carrot2; break;
+
+        default:
+          tex = null;
+          break;
+      }
+
+    if (!tex) continue;
+
+    const sprite = new PIXI.Sprite(tex);
+    sprite.x = obj.x;
+    sprite.y = obj.y;
+    sprite.width = TILE_SIZE;
+    sprite.height = TILE_SIZE;
+
+    // let finalFootY = sprite.y + TILE_SIZE;
+
+    //   if(obj.kind === "sunflowerT") {
+    //     finalFootY = sprite.y + TILE_SIZE * 2;
+    //   }
+
+    // 1. 빌딩 디테일인 경우 (창문, 문 등) -> Overlay 성격의 레이어로
+    if (isBuildingDetailKind(obj.kind)) {
+      setDepth(sprite as any, "buildingDetail");
+      layers.buildingDetail.addChild(sprite as any);
+      continue;
+    }
+
+    // 2. 물리적 충돌이 필요한 경우 -> CollisionWorld에 추가
+    if (isSolidKind(obj.kind)) {
+      cw.add({ x: obj.x, y: obj.y, w: TILE_SIZE, h: TILE_SIZE });
+    }
+
+    // 3. 일반 오브젝트 (나무 등)
+    layers.world.addChild(sprite as any);
+  }
+}
+
+export function isSolidKind(kind: string) {
+  return (
+    kind.startsWith("fence") ||
+    kind.startsWith("treeGreenGroup") ||
+    kind.startsWith("treeYellowGroup") ||
+    kind === "treeGreenSmall" ||
+    kind === "treeYellowSmall" ||
+    kind === "bush" ||
+    kind === "mushroom" ||
+    kind === "plant" ||
+    kind === "trashCan1" ||
+    kind === "trashCan2" ||
+    kind === "boxes1" ||
+    kind === "boxes2" ||
+    kind === "boxes3" ||
+    kind === "boxes4" ||
+    kind === "fireHyd" ||
+    kind === "bench" ||
+    kind === "atm" ||
+    kind === "parkingMeter" ||
+    kind === "barH" ||
+    kind === "unit" ||
+    kind.startsWith("well") ||
+    kind.endsWith("Tall2") ||
+    kind.endsWith("Tall1") ||
+    kind.startsWith("board") ||
+    kind.startsWith("drying") ||
+    kind.startsWith("oneLight") ||
+    kind.startsWith("twoLight") ||
+    kind.startsWith("sunflower")
+  );
+}
+
 function addLandmarkSpriteBillboard(
   container: PIXI.Container,
   centerWorldX: number,
@@ -58,38 +283,38 @@ function addLandmarkSpriteBillboard(
   const left = centerWorldX - (def.width * TILE_SIZE) / 2;
   const top = groundWorldY - def.height * TILE_SIZE;
 
-  const s = new PIXI.Sprite(opts.texture);
+  const sprite = new PIXI.Sprite(opts.texture);
 
   const widthRatio = opts.widthRatio ?? 0.7;
   const targetW = def.width * TILE_SIZE * widthRatio;
   const texW = opts.texture.width;
-  const texH = opts.texture.height;
 
   const scale = texW ? targetW / texW : 1;
-  s.scale.set(scale);
+  sprite.scale.set(scale);
 
   const offsetX = opts.offsetX ?? 0;
   const offsetY = opts.offsetY ?? 0;
 
-  s.x = left + (def.width * TILE_SIZE - s.width) / 2 + offsetX;
-  s.y = top + offsetY;
+  sprite.x = left + (def.width * TILE_SIZE - sprite.width) / 2 + offsetX;
+  sprite.y = top + offsetY;
 
-  container.addChild(s as any);
+  setDepth(sprite as any, "overlay");
+  container.addChild(sprite as any);
 
-  const baseY = s.y;
+  const baseY = sprite.y;
   const amp = TILE_SIZE * (opts.hoverAmpTiles ?? 0);
   const speed = opts.hoverSpeed ?? 0.06;
 
   registry.push({
     kind: "sprite",
-    s,
+    sprite,
     baseY,
     amp,
     speed,
     phase: opts.hoverPhase ?? Math.random() * Math.PI * 2,
   });
 
-  return s;
+  return sprite;
 }
 
 type LandmarkDef = {
@@ -149,7 +374,7 @@ export const LANDMARK_DEFS: Record<LandmarkKind, LandmarkDef> = {
   },
 };
 
-function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWorldX: number, groundWorldY: number) {
+function assembleLandmarkTiles(container: PIXI.Container, def: LandmarkDef, centerWorldX: number, groundWorldY: number) {
   const { width, height, rows } = def;
   const left = centerWorldX - (width * TILE_SIZE) / 2;
   const top = groundWorldY - height * TILE_SIZE;
@@ -165,7 +390,7 @@ function drawLandmarkRect(container: PIXI.Container, def: LandmarkDef, centerWor
       s.width = TILE_SIZE;
       s.height = TILE_SIZE;
 
-      setDepth(s as any, "buildingDetail");
+      setDepth(s as any, "world", groundWorldY);
       container.addChild(s as any);
     }
   }
@@ -190,6 +415,7 @@ export function addChurchSprite(container: PIXI.Container, worldX: number, groun
   const scale = targetW / tex.width;
   s.scale.set(scale);
 
+  setDepth(s as any, "world", groundY);
   container.addChild(s as any);
 
   return {
@@ -257,26 +483,22 @@ function drawHouses(container: PIXI.Container, kind: "orangeM" | "orangeS" | "bl
     s.y = top + TILE_SIZE * 2;
     s.width = TILE_SIZE;
     s.height = TILE_SIZE;
-    setDepth(s as any, "world");
+
+    setDepth(s as any, "world", groundY);
     container.addChild(s as any);
   }
 }
 
 /** Bank billboard (숫자판) */
-function createBankBillboard(
-  container: PIXI.Container,
-  screenLeft: number,
-  screenTop: number,
-  registry: BillboardInfo[]
-) {
+function createBankBillboard(container: PIXI.Container, screenLeft: number, screenTop: number, registry: BillboardInfo[]) {
   const screenWidth = 3.6 * TILE_SIZE;
   const screenHeight = 2 * TILE_SIZE;
 
-  const g = new PIXI.Graphics();
-  g.x = screenLeft;
-  g.y = screenTop;
-  setDepth(g as any, "buildingDetail");
-  container.addChild(g as any);
+  const  bilboard = new PIXI.Graphics();
+  bilboard.x = screenLeft;
+  bilboard.y = screenTop;
+  setDepth(bilboard as any, "buildingDetail");
+  container.addChild(bilboard as any);
 
   const margin = 2;
   const innerW = screenWidth - margin * 2;
@@ -306,14 +528,14 @@ function createBankBillboard(
     }
   }
 
-  registry.push({ kind: "bank", g, width: screenWidth, height: screenHeight, cells });
+  registry.push({ kind: "bank", bilboard, width: screenWidth, height: screenHeight, cells });
 }
 
 function toWorldPx(v: number) {
   return v >= TILE_SIZE ? v : v * TILE_SIZE;
 }
 
-export function drawLandmarksAndHouses(
+export function drawWorld(
   layers: {
     building: PIXI.Container;
     object: PIXI.Container;
@@ -329,7 +551,7 @@ export function drawLandmarksAndHouses(
     const worldX = toWorldPx(lm.x);
     const groundY = toWorldPx(lm.y);
 
-    drawLandmarkRect(layers.building, def, worldX, groundY);
+    assembleLandmarkTiles(layers.building, def, worldX, groundY);
 
     if (lm.kind === "bank") {
       const screenLeft = 33.2 * TILE_SIZE;
@@ -387,17 +609,17 @@ export function attachBillboardTicker(app: PIXI.Application, billboardsRef: { cu
 
       if (b.kind === "sprite") {
         b.phase += delta * b.speed;
-        b.s.y = b.baseY + Math.sin(b.phase) * b.amp;
+        b.sprite.y = b.baseY + Math.sin(b.phase) * b.amp;
         continue;
       }
 
-      const { g, width: w, height: h, cells } = b;
-      g.clear();
+      const { bilboard, width: w, height: h, cells } = b;
+      bilboard.clear();
 
-      g.lineStyle(2, 0x222222);
-      g.beginFill(0x050708);
-      g.drawRect(0, 0, w, h);
-      g.endFill();
+      bilboard.lineStyle(2, 0x222222);
+      bilboard.beginFill(0x050708);
+      bilboard.drawRect(0, 0, w, h);
+      bilboard.endFill();
 
       const margin = 2;
       const innerW = w - margin * 2;
@@ -418,15 +640,15 @@ export function attachBillboardTicker(app: PIXI.Application, billboardsRef: { cu
             (Math.min(255, blueG + flicker) << 8) |
             Math.min(255, blueB + flicker)) >>> 0;
 
-        g.lineStyle(1, 0x0a2035);
-        g.beginFill(color);
-        g.drawRect(margin + panelW * i, margin, panelW - 2, topH);
-        g.endFill();
+        bilboard.lineStyle(1, 0x0a2035);
+        bilboard.beginFill(color);
+        bilboard.drawRect(margin + panelW * i, margin, panelW - 2, topH);
+        bilboard.endFill();
       }
 
-      g.beginFill(0x050505);
-      g.drawRect(margin, margin + topH + 2, innerW, bottomH);
-      g.endFill();
+      bilboard.beginFill(0x050505);
+      bilboard.drawRect(margin, margin + topH + 2, innerW, bottomH);
+      bilboard.endFill();
       
       if (accum > 6) {
         accum = 0;

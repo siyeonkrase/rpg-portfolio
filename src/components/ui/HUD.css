@@ -64,7 +64,7 @@
   pointer-events: none;
 }
 
-.master-notif {
+.max-notif {
   position: absolute;
   top: -35px;
   left: 60px;
@@ -81,7 +81,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.inventory-slot.master-clickable:hover {
+.inventory-slot.max-clickable:hover {
   transform: translateY(-5px) scale(1.1);
   filter: brightness(1.2);
 }
